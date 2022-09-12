@@ -1,5 +1,5 @@
 # set base image (host OS)
-FROM arm32v7/python:latest
+FROM arm32v7/python:3.7-alpine
 
 # set the working directory in the container
 WORKDIR /app
