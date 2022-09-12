@@ -1,5 +1,5 @@
 # set base image (host OS)
-FROM arm32v7/python:3.7-alpine
+FROM arm32v7/python:3.7-buster
 
 # set the working directory in the container
 WORKDIR /app
@@ -9,6 +9,9 @@ COPY requirements.txt .
 
 # install dependencies
 RUN pip3 install -r requirements.txt
+
+# Intall the rpi.gpio python module
+RUN pip3 install --no-cache-dir rpi.gpio
 
 # copy the content of the local src directory to the working directory
 COPY . /app
