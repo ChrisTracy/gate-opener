@@ -17,7 +17,7 @@ RUN pip3 install --no-cache-dir rpi.gpio
 COPY . /app
 
 # command to run on container start
-CMD [ "python", "./GateV3.py" ]
+CMD [ "python", "./server.py" ]
 
 #Expose port 5151
 EXPOSE 5151/tcp
