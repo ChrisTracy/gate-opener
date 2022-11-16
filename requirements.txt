@@ -1,4 +1,0 @@
-flask
-flask_httpauth
-waitress
-RPi.GPIO
