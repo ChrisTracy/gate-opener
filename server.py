@@ -1,5 +1,3 @@
-from glob import glob
-from secrets import token_urlsafe
 from flask import Flask, request
 from flask_httpauth import HTTPTokenAuth
 from waitress import serve
@@ -8,13 +6,20 @@ import RPi.GPIO as GPIO
 import os
 import threading
 import time
+import logging
 
 pin = 16
 
+logging.basicConfig(filename='app.log',
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
+
 def getTokens():
-    os.environ['AT_API_KEY'] = #AirTable API Key
-    os.environ['Base_ID'] = #AirTable Base ID
-    os.environ['Table_Name'] = 'users' #Table Name
+    os.environ['AT_API_KEY'] = ''
+    os.environ['Base_ID'] = ''
+    os.environ['Table_Name'] = 'users'
 
     at_api_key = os.environ['AT_API_KEY']
     AT_BaseID  = os.environ['Base_ID']
@@ -33,7 +38,7 @@ def getTokens():
             userVal = ATconent['fields']['user']
             tokens.update({tokenVal: userVal})
 
-    threading.Timer(30, getTokens).start()
+    threading.Timer(21600, getTokens).start()
 
 getTokens()
 
@@ -54,7 +59,6 @@ def verify_token(token):
 def index():
     return "Hello, {}!".format(auth.current_user())
 
-@app.route('/register', methods=["POST"])
 def register():
     device = request.args.get('device')
     key = request.args.get('key')
@@ -62,7 +66,8 @@ def register():
     RawData = {"user": device, "token":key}
     table.create(RawData)
 
-    return("Device key has been added. An admin must approve the request!")
+    return "Device key has been added. An admin must approve the request!"
+
 
 @app.route('/gate/front/', methods=["POST"])
 @auth.login_required
@@ -70,8 +75,9 @@ def open():
     GPIO.output(pin,GPIO.LOW)
     time.sleep(.10)
     GPIO.output(pin,GPIO.HIGH)
-
+    logging.info('Gate opened by {}'.format(auth.current_user()))
     return "Gate opened by {}!".format(auth.current_user())
 
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5151)
+
