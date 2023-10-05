@@ -1,6 +1,9 @@
 # Raspberry Pi Gate Opener
 
-This project comes as a pre-built docker image that enables you to uitilze a relay and raspberry pi to open a gate or garage door via API call.
+This project comes as a pre-built docker image that enables you to uitilze a relay and raspberry pi to open a gate or garage door via API call. You will need to create a table in AirTable with 3 fields:
+- user (single line of text)
+- token (single line of text)
+- enabled (checkbox)
 
 ## Quick Setup
 
