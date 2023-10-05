@@ -16,11 +16,9 @@ version: "3"
 
 services:
   gate_opener:
-
     image: gateopener
     restart: unless-stopped
     privileged: true
-
     environment:
       AT_API_KEY: "<AirTable_Token>" #Airtable token (generate in the airtable dev portal and grant it access to the table)
       BASE_ID: "<AirTable_Base_ID>" #Airtable Base ID (found in the URL)
