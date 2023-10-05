@@ -22,8 +22,8 @@ services:
     privileged: true
 
     environment:
-      AT_API_KEY: <AirTable_Token> #Airtable token (generate in the airtable dev portal and grant it access to the table)
-      BASE_ID: <AirTable_Base_ID> #Airtable Base ID (found in the URL)
+      AT_API_KEY: "<AirTable_Token>" #Airtable token (generate in the airtable dev portal and grant it access to the table)
+      BASE_ID: "<AirTable_Base_ID>" #Airtable Base ID (found in the URL)
       TABLE_NAME: "users" #Airtable name
       GPIO_PIN: "16" #GPIO PIN
       TOKEN_INTERVAL: "5400" #how long in seconds before pulling in new tokens. (Free version has a limit of 1000 calls a month)
