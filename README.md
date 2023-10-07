@@ -24,7 +24,7 @@ sudo apt-get install -y python3 python3-pip
 sudo pip3 install docker-compose
 ```
 
-3. Add the current user to the docker group to avoid using sudo. You may need to lougout and back in after doing this. 
+3. Add the current user to the docker group to avoid using sudo. You must lougout and back in after doing this, otherwise you will need to sudo the rest of the commands!
 ```bash
 sudo usermod -aG docker ${USER}
 ```
