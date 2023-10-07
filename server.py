@@ -120,15 +120,19 @@ def refreshTokens():
     
         global tokens
         tokens = {}
-    except:
-        logging.exception("Could not reach Airtable!")
-
-    if ATcontents is not None:
+        
+        if ATcontents is not None:
         for ATconent in ATcontents:
             if "enabled" in ATconent['fields']:
                 tokenVal = ATconent['fields']['token']
                 userVal = ATconent['fields']['user']
                 tokens.update({tokenVal: userVal})
+
+        return "Tokens updated. Request made by {}!".format(auth.current_user())
+
+    except:
+        logging.exception("Could not reach Airtable!")
+        return "Tokens could not be updated. Request made by {}!".format(auth.current_user())
 
 #start server
 if __name__ == "__main__":
