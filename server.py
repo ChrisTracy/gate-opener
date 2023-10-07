@@ -76,8 +76,8 @@ def verify_token(token):
         payload = jwt.decode(token, jwt_secret_key, algorithms=['HS256'])
         logging.info('Decoded payload: {}'.format(payload))
         user = payload['user']
-        print(user)
-        print(tokens)
+        logging.info('user: {}'.format(user))
+        logging.info('tokens: {}'.format(tokens))
         if user in tokens:
             return user
     except jwt.ExpiredSignatureError:
