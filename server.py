@@ -78,6 +78,7 @@ def verify_token(token):
     try:
         payload = jwt.decode(token, jwt_secret_key, algorithms=['HS256'])
         logging.info(f"{payload} is attempting to authenticate!")
+        logging.info(f"auth list: {auths}")
         user = payload.get('user')
         if payload in auths:
             return user
