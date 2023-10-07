@@ -29,7 +29,7 @@ sudo pip3 install docker-compose
 sudo usermod -aG docker ${USER}
 ```
 
-4. Clone the Github repo (docker hub does not support autoamted arm builds at this time. See [issue 109](https://github.com/docker/roadmap/issues/109)):
+4. Clone the Github repo (docker hub does not support automated arm builds at this time. See [issue 109](https://github.com/docker/roadmap/issues/109)):
 ```bash
 git clone https://github.com/ChrisTracy/gate-opener
 ```
