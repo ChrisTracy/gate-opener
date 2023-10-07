@@ -90,13 +90,15 @@ def index():
     current_user = auth.current_user()
     return f"Hello, {current_user}. Your login to {friendly_name} was successful!"
 
-# Register route - Issue JWT tokens
+# Register route - Issue tokens with a very distant expiration date (practically non-expiring)
 @app.route('/api/v1/register', methods=["POST"])
 def register():
     device = request.args.get('device')
 
-    # Create a JWT token with user/device information
-    token = jwt.encode({'user': device}, jwt_secret_key, algorithm='HS256').decode()
+    # Create a JWT token with user/device
+    import datetime
+    expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=36500)
+    token = jwt.encode({'user': device, 'exp': expiration_date}, jwt_secret_key, algorithm='HS256').decode()
 
     # Store the token and user/device information in Airtable
     RawData = {"user": device, "token": token}
