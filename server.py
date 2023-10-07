@@ -2,6 +2,7 @@ import os
 import threading
 import time
 import logging
+import base64
 from flask import Flask, request
 from flask_httpauth import HTTPTokenAuth
 from waitress import serve
