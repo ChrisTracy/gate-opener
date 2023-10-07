@@ -41,16 +41,17 @@ def getTokens():
         table = Table(api_key=at_api_key, base_id=AT_BaseID, table_name=AT_TableName)
         ATcontents = table.all()
 
-        global ATusers
-        ATusers = {}
+        global tokens
+        tokens = {}
     except:
         logging.exception("Could not reach Airtable!")
 
     if ATcontents is not None:
         for ATconent in ATcontents:
             if "enabled" in ATconent['fields']:
+                tokenVal = ATconent['fields']['token']
                 userVal = ATconent['fields']['user']
-                ATusers.update({userVal})
+                tokens.update({tokenVal: userVal})
 
     threading.Timer(Token_Interval, getTokens).start()
 
@@ -71,13 +72,9 @@ auth = HTTPTokenAuth(scheme='Bearer')
 @auth.verify_token
 def verify_token(token):
     try:
-        logging.info('Received token: {}'.format(token))
         payload = jwt.decode(token, jwt_secret_key, algorithms=['HS256'])
-        logging.info('Decoded payload: {}'.format(payload))
-        user = payload['user']
-        logging.info('user: {}'.format(user))
-        logging.info('ATusers: {}'.format(ATusers))
-        if user in ATusers:
+        user = payload.get('user')
+        if user in tokens:
             return user
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
@@ -138,14 +135,15 @@ def refreshTokens():
         table = Table(api_key=at_api_key, base_id=AT_BaseID, table_name=AT_TableName)
         ATcontents = table.all()
 
-        global ATusers
-        ATusers = {}
+        global tokens
+        tokens = {}
 
         if ATcontents is not None:
             for ATcontent in ATcontents:
                 if "enabled" in ATcontent['fields']:
+                    tokenVal = ATcontent['fields']['token']
                     userVal = ATcontent['fields']['user']
-                    ATusers.update({userVal})
+                    tokens.update({tokenVal: userVal})
 
         return "Tokens updated. Request made by {}!".format(auth.current_user())
 
