@@ -7,31 +7,49 @@ This project comes as a pre-built docker image that enables you to uitilze a rel
 
 ## Quick Setup
 
-1. Install Docker and Docker-Compose
-- [Docker Install documentation](https://docs.docker.com/install/)
-- [Docker-Compose Install documentation](https://docs.docker.com/compose/install/)
+1. Install Docker (I prefer the apt method)
+- [Docker Install documentation](https://docs.docker.com/engine/install/raspberry-pi-os/)
 
-2. Clone the Github repo:
+2. Install Docker Compose
+```bash
+sudo apt-get install libffi-dev libssl-dev
+```
+```bash
+sudo apt install python3-dev
+```
+```bash
+sudo apt-get install -y python3 python3-pip
+```
+```bash
+sudo pip3 install docker-compose
+```
+
+3. Add the current user to the docker group to avoid using sudo. You may need to lougout and back in after doing this. 
+```bash
+sudo usermod -aG docker ${USER}
+```
+
+4. Clone the Github repo:
 ```bash
 git clone https://github.com/ChrisTracy/gate-opener
 ```
 
-3. Change directories into gate-opener
+5. Change directories into gate-opener
 ```bash
 cd gate-opener
 ```
 
-4. Build the docker image:
+6. Build the docker image:
 ```bash
 docker build -t gate-opener .
 ```
 
-5. Create a docker-compose.yml file:
+7. Create a docker-compose.yml file:
 ```bash
 nano docker-compose.yml
 ```
 
-6. Add this to the YAML file with your own parameters:
+8. Add this to the YAML file with your own parameters:
 ```yml
 version: "3"
 
@@ -51,7 +69,7 @@ services:
       - "5151:5151"
 ```
 
-3. Bring up your stack by running
+9. Bring up your stack by running
 
 ```bash
 docker-compose up -d
