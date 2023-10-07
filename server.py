@@ -42,7 +42,7 @@ def getTokens():
         ATcontents = table.all()
 
         global tokens
-        global auth
+        global auths
         tokens = {}
         auths = []
     except:
