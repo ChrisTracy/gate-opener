@@ -90,8 +90,9 @@ def register():
     logging.info('Registering new device: %s', device)
     return f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request!"
 
-#open route
+#trigger route
 @app.route('/api/v1/trigger', methods=["POST"])
+@app.route('/gate/front/', methods=["POST"]) #legacy. Will be deprecated
 @auth.login_required
 
 #trigger function
