@@ -74,3 +74,14 @@ services:
 ```bash
 docker-compose up -d
 ```
+
+## API
+
+These are the api endpoints for the server:
+
+| Method   | URL                                      | Description                                             | Auth | Params |
+| -------- | ---------------------------------------- | --------------------------------------------------------| ---- | ------ |
+| `GET`    | `/api/v1/hello`                          | Sends an authorized reuest to the server to test access.|:heavy_check_mark:|       |
+| `POST`   | `/api//v1/register`                      | Registers a new device/key to the Airtable.             |      | device, key       |
+| `POST`   | `/api/v1/trigger`                        | Triggers the relay.                                     |:heavy_check_mark:|        |
+| `POST`   | `/api/v1/refreshtokens`                  | Refreshes the tokens from Airtable.                     |:heavy_check_mark:|        |
