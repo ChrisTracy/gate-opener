@@ -67,16 +67,14 @@ auth = HTTPTokenAuth(scheme='Bearer')
 
 #verify token
 @auth.verify_token
-@auth.verify_token
 def verify_token(token):
     if token:
         try:
             # Decode (decode) the token from base64
             decoded_token = base64.b64decode(token).decode()
             if decoded_token in tokens:
-                # Return the associated device information
-                device_info = tokens[decoded_token]['device']  # Assuming the device information is stored in the 'device' field
-                return device_info
+                # Return the user/device information associated with the token
+                return tokens[decoded_token]  # Assuming tokens are strings representing user/device information
         except Exception as e:
             logging.error('Token decoding failed: %s', str(e))
     return None
