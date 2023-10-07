@@ -67,15 +67,18 @@ auth = HTTPTokenAuth(scheme='Bearer')
 
 #verify token
 @auth.verify_token
+@auth.verify_token
 def verify_token(token):
     if token:
         try:
-            # Decode (decrypt) the token
+            # Decode (decode) the token from base64
             decoded_token = base64.b64decode(token).decode()
             if decoded_token in tokens:
-                return tokens[decoded_token]
+                # Return the associated device information
+                device_info = tokens[decoded_token]['device']  # Assuming the device information is stored in the 'device' field
+                return device_info
         except Exception as e:
-            logging.error('Token decryption failed: %s', str(e))
+            logging.error('Token decoding failed: %s', str(e))
     return None
 
 #welcome route
@@ -85,23 +88,23 @@ def index():
     current_user = auth.current_user()
     return f"Hello, {current_user}. Your login to {friendly_name} was succesful!"
 
-#register route
+# Register Route - Issue the client token in base64 format in the return response
 @app.route('/api/v1/register', methods=["POST"])
-
-#register function
 def register():
     device = request.args.get('device')
     key = request.args.get('key')
 
-    # Encrypt the device token
-    encrypted_token = base64.b64encode(key.encode()).decode()
+    # Encode the client token in base64
+    client_token_base64 = base64.b64encode(key.encode()).decode()
 
-    # Store the encrypted token and user/device information in Airtable
-    RawData = {"user": device, "token": encrypted_token}
+    # Store the server token and user/device information in Airtable
+    RawData = {"user": device, "token": key}  # Store the server token as is
     table.create(RawData)
     logging.info('Registering new device: %s', device)
-    return f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request!"
 
+    # Include the client token in base64 format in the registration response
+    return f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request. Your client token (in base64) is: {client_token_base64}"
+    
 #trigger route
 @app.route('/api/v1/trigger', methods=["POST"])
 @app.route('/gate/front/', methods=["POST"]) #legacy. Will be deprecated
