@@ -122,11 +122,11 @@ def refreshTokens():
         tokens = {}
         
         if ATcontents is not None:
-        for ATconent in ATcontents:
-            if "enabled" in ATconent['fields']:
-                tokenVal = ATconent['fields']['token']
-                userVal = ATconent['fields']['user']
-                tokens.update({tokenVal: userVal})
+            for ATconent in ATcontents:
+                if "enabled" in ATconent['fields']:
+                    tokenVal = ATconent['fields']['token']
+                    userVal = ATconent['fields']['user']
+                    tokens.update({tokenVal: userVal})
 
         return "Tokens updated. Request made by {}!".format(auth.current_user())
 
