@@ -70,10 +70,10 @@ auth = HTTPTokenAuth(scheme='Bearer')
 def verify_token(token):
     if token:
         try:
-            # Attempt to decrypt the token
-            decrypted_token = cipher_suite.decrypt(token.encode()).decode()
-            if decrypted_token in tokens:
-                return tokens[decrypted_token]
+            # Decode (decrypt) the token
+            decoded_token = base64.b64decode(token).decode()
+            if decoded_token in tokens:
+                return tokens[decoded_token]
         except Exception as e:
             logging.error('Token decryption failed: %s', str(e))
     return None
@@ -90,14 +90,15 @@ def index():
 
 #register function
 def register():
+   def register():
     device = request.args.get('device')
     key = request.args.get('key')
 
     # Encrypt the device token
-    encrypted_token = cipher_suite.encrypt(key.encode())
+    encrypted_token = base64.b64encode(key.encode()).decode()
 
     # Store the encrypted token and user/device information in Airtable
-    RawData = {"user": device, "token": encrypted_token.decode()}
+    RawData = {"user": device, "token": encrypted_token}
     table.create(RawData)
     logging.info('Registering new device: %s', device)
     return f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request!"
