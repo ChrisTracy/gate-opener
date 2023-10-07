@@ -1,5 +1,6 @@
 flask
 flask_httpauth
 waitress
+cryptography
 pyairtable
 RPi.GPIO
