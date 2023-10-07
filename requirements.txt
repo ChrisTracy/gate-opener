@@ -3,3 +3,4 @@ flask_httpauth
 waitress
 pyairtable
 RPi.GPIO
+PyJWT
