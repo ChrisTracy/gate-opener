@@ -73,7 +73,7 @@ auth = HTTPTokenAuth(scheme='Bearer')
 def verify_token(token):
     try:
         payload = jwt.decode(token, jwt_secret_key, algorithms=['HS256'])
-        user = payload.get('user')
+        user = payload.get('token')
         if user in tokens:
             return user
     except jwt.ExpiredSignatureError:
