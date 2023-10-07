@@ -8,7 +8,6 @@ from flask_httpauth import HTTPTokenAuth
 from waitress import serve
 from pyairtable import Table
 import RPi.GPIO as GPIO
-from cryptography.fernet import Fernet
 
 #set gpio pin and friendly name
 friendly_name = os.environ['FRIENDLY_NAME']
