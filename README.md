@@ -16,6 +16,9 @@ This is the hardware I am using. You can certainly do this with less. A pi0, jum
 - [HiLetgo 5V One Channel Relay Module](https://www.amazon.com/gp/product/B00LW15A4W)
 - [16 Gauge Wire Combo 6 Pack](https://www.amazon.com/gp/product/B07MBWKX53)
 
+## Wiring
+![Raspberry Pi 3 Wiring](digrams/pi-wiring.png)
+
 ## Installation
 
 1. Install Docker (I prefer the apt method):
@@ -81,6 +84,25 @@ services:
 ```
 
 9. Bring up your stack by running:
+
+```bash
+docker-compose up -d
+```
+
+## Updating
+Until the previously mentioned [issue with Docker hub](https://github.com/docker/roadmap/issues/109) is resolved, you will need to update the server from github directly.
+
+```bash
+cd gate-opener
+```
+
+```bash
+git pull
+```
+
+```bash
+docker build -t gate-opener .
+```
 
 ```bash
 docker-compose up -d
