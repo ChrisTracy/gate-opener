@@ -95,17 +95,18 @@ def index():
 def register():
     device = request.args.get('device')
 
-    # Create a JWT token with user/device
+    # Create a JWT token with user/device information and a distant expiration date
+    # For example, set it to expire in 100 years (adjust the value as needed)
     import datetime
-    expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=36500)
-    token = jwt.encode({'user': device, 'exp': expiration_date}, jwt_secret_key, algorithm='HS256').decode()
+    expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=36500)  # 100 years
+    token = jwt.encode({'user': device, 'exp': expiration_date}, jwt_secret_key, algorithm='HS256')
 
     # Store the token and user/device information in Airtable
     RawData = {"user": device, "token": token}
     table.create(RawData)
     logging.info('Registering new device: %s', device)
 
-    return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
+    return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token.decode()})
 
 # Trigger route
 @app.route('/api/v1/trigger', methods=["POST"])
