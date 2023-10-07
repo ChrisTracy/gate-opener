@@ -90,7 +90,6 @@ def index():
 
 #register function
 def register():
-   def register():
     device = request.args.get('device')
     key = request.args.get('key')
 
