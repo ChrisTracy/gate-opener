@@ -7,6 +7,7 @@ from flask_httpauth import HTTPTokenAuth
 from waitress import serve
 from pyairtable import Table
 import RPi.GPIO as GPIO
+from cryptography.fernet import Fernet
 
 #set gpio pin and friendly name
 friendly_name = os.environ['FRIENDLY_NAME']
@@ -67,8 +68,15 @@ auth = HTTPTokenAuth(scheme='Bearer')
 #verify token
 @auth.verify_token
 def verify_token(token):
-    if token in tokens:
-        return tokens[token]
+    if token:
+        try:
+            # Attempt to decrypt the token
+            decrypted_token = cipher_suite.decrypt(token.encode()).decode()
+            if decrypted_token in tokens:
+                return tokens[decrypted_token]
+        except Exception as e:
+            logging.error('Token decryption failed: %s', str(e))
+    return None
 
 #welcome route
 @app.route('/api/v1/hello')
@@ -85,7 +93,11 @@ def register():
     device = request.args.get('device')
     key = request.args.get('key')
 
-    RawData = {"user": device, "token":key}
+    # Encrypt the device token
+    encrypted_token = cipher_suite.encrypt(key.encode())
+
+    # Store the encrypted token and user/device information in Airtable
+    RawData = {"user": device, "token": encrypted_token.decode()}
     table.create(RawData)
     logging.info('Registering new device: %s', device)
     return f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request!"
