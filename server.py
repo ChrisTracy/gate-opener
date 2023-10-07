@@ -7,6 +7,7 @@ from flask_httpauth import HTTPTokenAuth
 from waitress import serve
 from pyairtable import Table
 import RPi.GPIO as GPIO
+import random
 import jwt  # Import PyJWT
 
 # Set GPIO pin and friendly name
@@ -104,7 +105,8 @@ def register():
     # Create a JWT token with user/device information
     import datetime
     expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=36500)
-    token = jwt.encode({'user': device, 'exp': expiration_date}, jwt_secret_key, algorithm='HS256')
+    num = random.random()
+    token = jwt.encode({device, num}, jwt_secret_key, algorithm='HS256')
 
     # Store the token and user/device information in Airtable
     RawData = {"user": device, "auth": f"'user': {device}, 'exp': {expiration_date}"}
