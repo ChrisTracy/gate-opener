@@ -42,7 +42,9 @@ def getTokens():
         ATcontents = table.all()
 
         global tokens
+        global auth
         tokens = {}
+        auths = []
     except:
         logging.exception("Could not reach Airtable!")
 
@@ -51,7 +53,9 @@ def getTokens():
             if "enabled" in ATconent['fields']:
                 tokenVal = ATconent['fields']['token']
                 userVal = ATconent['fields']['user']
+                authVal = ATconent['fields']['auth']
                 tokens.update({tokenVal: userVal})
+                auths.append(authVal)
 
     threading.Timer(Token_Interval, getTokens).start()
 
@@ -74,7 +78,7 @@ def verify_token(token):
     try:
         payload = jwt.decode(token, jwt_secret_key, algorithms=['HS256'])
         user = payload.get('user')
-        if user in tokens:
+        if user in auths:
             return user
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
