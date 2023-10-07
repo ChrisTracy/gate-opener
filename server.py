@@ -8,7 +8,8 @@ from waitress import serve
 from pyairtable import Table
 import RPi.GPIO as GPIO
 
-#set gpio pin
+#set gpio pin and friendly name
+friendly_name = os.environ['FRIENDLY_NAME']
 pin = os.environ['GPIO_PIN']
 pin = int(pin)
 
@@ -86,7 +87,7 @@ def register():
     RawData = {"user": device, "token":key}
     table.create(RawData)
     logging.info('Registering new device: %s', device)
-    return "Device key has been added. An admin must approve the request!"
+    return f"Device key has been added to {friendly_name}. An admin must approve the request!"
 
 #open route
 @app.route('/api/v1/trigger', methods=["POST"])
@@ -98,7 +99,8 @@ def open():
     time.sleep(.10)
     GPIO.output(pin,GPIO.LOW)
     logging.info('Gate opened by {}'.format(auth.current_user()))
-    return "Gate opened by {}!".format(auth.current_user())
+    current_user = auth.current_user()
+    return f"{friendly_name} opened by {current_user}!"
 
 #refresh token route
 @app.route('/api/v1/refreshtokens', methods=["POST"])
