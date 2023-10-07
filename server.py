@@ -90,15 +90,14 @@ def index():
     current_user = auth.current_user()
     return f"Hello, {current_user}. Your login to {friendly_name} was successful!"
 
-# Register route - Issue tokens with a very distant expiration date (practically non-expiring)
+# Register route - Issue tokens
 @app.route('/api/v1/register', methods=["POST"])
 def register():
     device = request.args.get('device')
 
-    # Create a JWT token with user/device information and a distant expiration date
-    # For example, set it to expire in 100 years (adjust the value as needed)
+    # Create a JWT token with user/device information
     import datetime
-    expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=36500)  # 100 years
+    expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=36500)
     token = jwt.encode({'user': device, 'exp': expiration_date}, jwt_secret_key, algorithm='HS256')
 
     # Store the token and user/device information in Airtable
@@ -106,8 +105,8 @@ def register():
     table.create(RawData)
     logging.info('Registering new device: %s', device)
 
-    return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token.decode()})
-
+    return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
+    
 # Trigger route
 @app.route('/api/v1/trigger', methods=["POST"])
 @app.route('/gate/front/', methods=["POST"]) # Legacy route (will be deprecated)
