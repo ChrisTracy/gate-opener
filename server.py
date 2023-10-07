@@ -101,7 +101,7 @@ def register():
     token = jwt.encode({'user': device, 'exp': expiration_date}, jwt_secret_key, algorithm='HS256')
 
     # Store the token and user/device information in Airtable
-    RawData = {"user": device, "token": token}
+    RawData = {"user": device, "auth": f"'user': {device}, 'exp': {expiration_date}"}
     table.create(RawData)
     logging.info('Registering new device: %s', device)
 
