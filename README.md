@@ -5,7 +5,16 @@ This project comes as a pre-built docker image that enables you to uitilze a rel
 - token (single line of text)
 - enabled (checkbox)
 
-## Quick Setup
+## Hardware
+
+This is the hardware I am using. You can certainly do this with less. A pi0, jumper wires, and any relay will work.
+
+- [Raspberry Pi 3B+](https://www.raspberrypi.com/products/raspberry-pi-3-model-b-plus/)
+- [RPi GPIO Terminal Block Breakout Board HAT](https://www.amazon.com/gp/product/B0876V959B)
+- [HiLetgo 5V One Channel Relay Module](https://www.amazon.com/gp/product/B00LW15A4W)
+- [16 Gauge Wire Combo 6 Pack](https://www.amazon.com/gp/product/B07MBWKX53)
+
+## Installation
 
 1. Install Docker (I prefer the apt method)
 - [Docker Install documentation](https://docs.docker.com/engine/install/raspberry-pi-os/)
@@ -85,13 +94,3 @@ These are the api endpoints for the server:
 | `POST`   | `/api//v1/register`                      | Registers a new device/key to the Airtable.             |      | device, key       |
 | `POST`   | `/api/v1/trigger`                        | Triggers the relay.                                     |:heavy_check_mark:|        |
 | `POST`   | `/api/v1/refreshtokens`                  | Refreshes the tokens from Airtable.                     |:heavy_check_mark:|        |
-
-## Hardware
-
-This is the hardware I am using. You can certainly do this with less. A pi0, jumper wires, and any relay will work.
-
-- [Raspberry Pi 3B+](https://www.raspberrypi.com/products/raspberry-pi-3-model-b-plus/)
-- [RPi GPIO Terminal Block Breakout Board HAT](https://www.amazon.com/gp/product/B0876V959B)
-- [HiLetgo 5V One Channel Relay Module](https://www.amazon.com/gp/product/B00LW15A4W)
-- [16 Gauge Wire Combo 6 Pack](https://www.amazon.com/gp/product/B07MBWKX53)
-
