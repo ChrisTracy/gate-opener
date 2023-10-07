@@ -107,7 +107,7 @@ def open():
 #refresh tokens function
 def refreshTokens():
     try:
-        logging.info('Getting tokens from AirTable')
+        logging.info('Updating tokens. API call made by {}'.format(auth.current_user()))
         at_api_key = os.environ['AT_API_KEY']
         AT_BaseID  = os.environ['BASE_ID']
         AT_TableName = os.environ['TABLE_NAME']
