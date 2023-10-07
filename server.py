@@ -74,7 +74,8 @@ def verify_token(token):
 @app.route('/api/v1/hello')
 @auth.login_required
 def index():
-    return "Hello, {}!".format(auth.current_user())
+    current_user = auth.current_user()
+    return f"Hello, {current_user}. Your login to {friendly_name} was succesful!"
 
 #register route
 @app.route('/api/v1/register', methods=["POST"])
@@ -87,19 +88,19 @@ def register():
     RawData = {"user": device, "token":key}
     table.create(RawData)
     logging.info('Registering new device: %s', device)
-    return f"Device key has been added to {friendly_name}. An admin must approve the request!"
+    return f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request!"
 
 #open route
 @app.route('/api/v1/trigger', methods=["POST"])
 @auth.login_required
 
-#open function
-def open():
+#trigger function
+def trigger():
     GPIO.output(pin,GPIO.HIGH)
     time.sleep(.10)
     GPIO.output(pin,GPIO.LOW)
-    logging.info('Gate opened by {}'.format(auth.current_user()))
     current_user = auth.current_user()
+    logging.info(f"{friendly_name} opened by {current_user}!")
     return f"{friendly_name} opened by {current_user}!"
 
 #refresh token route
