@@ -16,10 +16,10 @@ This is the hardware I am using. You can certainly do this with less. A pi0, jum
 
 ## Installation
 
-1. Install Docker (I prefer the apt method)
+1. Install Docker (I prefer the apt method):
 - [Docker Install documentation](https://docs.docker.com/engine/install/raspberry-pi-os/)
 
-2. Install Docker Compose
+2. Install Docker Compose:
 ```bash
 sudo apt-get install libffi-dev libssl-dev
 ```
@@ -33,7 +33,7 @@ sudo apt-get install -y python3 python3-pip
 sudo pip3 install docker-compose
 ```
 
-3. Add the current user to the docker group to avoid using sudo. You must lougout and back in after doing this, otherwise you will need to sudo the rest of the commands!
+3. Add the current user to the docker group to avoid using sudo. You must lougout and back in after doing this, otherwise you will need to sudo the rest of the commands!:
 ```bash
 sudo usermod -aG docker ${USER}
 ```
@@ -43,7 +43,7 @@ sudo usermod -aG docker ${USER}
 git clone https://github.com/ChrisTracy/gate-opener
 ```
 
-5. Change directories into gate-opener
+5. Change directories into gate-opener:
 ```bash
 cd gate-opener
 ```
@@ -78,7 +78,7 @@ services:
       - "5151:5151"
 ```
 
-9. Bring up your stack by running
+9. Bring up your stack by running:
 
 ```bash
 docker-compose up -d
