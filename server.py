@@ -52,7 +52,6 @@ def getTokens():
             if "enabled" in ATconent['fields']:
                 userVal = ATconent['fields']['user']
                 authVal = ATconent['fields']['auth']
-                tokens.update({tokenVal: userVal})
                 auths.append(authVal)
 
     threading.Timer(Token_Interval, getTokens).start()
@@ -151,7 +150,6 @@ def refreshTokens():
             if "enabled" in ATconent['fields']:
                 userVal = ATconent['fields']['user']
                 authVal = ATconent['fields']['auth']
-                tokens.update({tokenVal: userVal})
                 auths.append(authVal)
 
         return "Tokens updated. Request made by {}!".format(auth.current_user())
