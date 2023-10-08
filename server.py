@@ -8,7 +8,7 @@ from waitress import serve
 from pyairtable import Table
 import RPi.GPIO as GPIO
 import random
-import jwt  # Import PyJWT
+import jwt
 
 # Set GPIO pin and friendly name
 friendly_name = os.environ['FRIENDLY_NAME']
@@ -42,9 +42,7 @@ def getTokens():
         table = Table(api_key=at_api_key, base_id=AT_BaseID, table_name=AT_TableName)
         ATcontents = table.all()
 
-        global tokens
         global auths
-        tokens = {}
         auths = []
     except:
         logging.exception("Could not reach Airtable!")
@@ -52,7 +50,6 @@ def getTokens():
     if ATcontents is not None:
         for ATconent in ATcontents:
             if "enabled" in ATconent['fields']:
-                tokenVal = ATconent['fields']['token']
                 userVal = ATconent['fields']['user']
                 authVal = ATconent['fields']['auth']
                 tokens.update({tokenVal: userVal})
@@ -79,7 +76,6 @@ def verify_token(token):
     try:
         payload = jwt.decode(token, jwt_secret_key, algorithms=['HS256'])
         logging.info(f"{payload} is attempting to authenticate!")
-        logging.info(f"auth list: {auths}")
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         is_rand_in_auth = any(rand_value_str in element for element in auths)
@@ -97,7 +93,7 @@ def verify_token(token):
 @auth.login_required
 def index():
     current_user = auth.current_user()
-    return f"Hello, {current_user}. Your login to {friendly_name} was successful!"
+    return f"Your login to {friendly_name} was successful!"
 
 # Register route - Issue tokens
 @app.route('/api/v1/register', methods=["POST"])
@@ -115,7 +111,7 @@ def register():
     table.create(RawData)
     logging.info('Registering new device: %s', device)
 
-    return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
+    return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token:": token})
     
 # Trigger route
 @app.route('/api/v1/trigger', methods=["POST"])
@@ -134,7 +130,7 @@ def trigger():
 @auth.login_required
 def refreshTokens():
     try:
-        logging.info('Updating tokens. API call made by {}'.format(auth.current_user()))
+        logging.info('Getting tokens from AirTable')
         at_api_key = os.environ['AT_API_KEY']
         AT_BaseID = os.environ['BASE_ID']
         AT_TableName = os.environ['TABLE_NAME']
@@ -145,15 +141,18 @@ def refreshTokens():
         table = Table(api_key=at_api_key, base_id=AT_BaseID, table_name=AT_TableName)
         ATcontents = table.all()
 
-        global tokens
-        tokens = {}
+        global auths
+        auths = []
+    except:
+        logging.exception("Could not reach Airtable!")
 
-        if ATcontents is not None:
-            for ATcontent in ATcontents:
-                if "enabled" in ATcontent['fields']:
-                    tokenVal = ATcontent['fields']['token']
-                    userVal = ATcontent['fields']['user']
-                    tokens.update({tokenVal: userVal})
+    if ATcontents is not None:
+        for ATconent in ATcontents:
+            if "enabled" in ATconent['fields']:
+                userVal = ATconent['fields']['user']
+                authVal = ATconent['fields']['auth']
+                tokens.update({tokenVal: userVal})
+                auths.append(authVal)
 
         return "Tokens updated. Request made by {}!".format(auth.current_user())
 
