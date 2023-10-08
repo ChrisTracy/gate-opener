@@ -106,10 +106,10 @@ def register():
     import datetime
     expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=36500)
     num = random.random()
-    token = jwt.encode({'device':device,'rand':num}, jwt_secret_key, algorithm='HS256')
+    token = jwt.encode({'device':device, 'rand':num}, jwt_secret_key, algorithm='HS256')
 
     # Store the token and user/device information in Airtable
-    RawData = {"user": device, "auth": f"'device':{device},'rand':{num}"}
+    RawData = {"user": device, "auth": f"'device':{device}, 'rand':{num}"}
     table.create(RawData)
     logging.info('Registering new device: %s', device)
 
