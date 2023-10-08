@@ -81,7 +81,7 @@ def verify_token(token):
         logging.info(f"{payload} is attempting to authenticate!")
         logging.info(f"auth list: {auths}")
         numAuth = payload.get('rand')
-        if NumAuth in auths:
+        if numAuth in auths:
             return user
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
