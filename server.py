@@ -84,7 +84,7 @@ def verify_token(token):
         rand_value_str = str(numAuth)
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
-            return user
+            return "Token found! Auth Succesful"
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
     except jwt.InvalidTokenError:
