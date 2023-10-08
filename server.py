@@ -156,10 +156,6 @@ def refreshTokens():
 
         return "Tokens updated. Request made by {}!".format(auth.current_user())
 
-    except:
-        logging.exception("Could not reach Airtable!")
-        return "Tokens could not be updated. Request made by {}!".format(auth.current_user())
-
 # Start server
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5151)
