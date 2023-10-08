@@ -80,7 +80,7 @@ def verify_token(token):
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
             logging.info("Token found! Auth Succesful")
-            return rand_value_str
+            return True
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
     except jwt.InvalidTokenError:
