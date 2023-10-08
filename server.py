@@ -100,18 +100,21 @@ def index():
 def register():
     device = request.args.get('device')
 
-    # Create a JWT token with user/device information
-    import datetime
-    expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=36500)
-    num = random.random()
-    token = jwt.encode({'device':device, 'rand':num}, jwt_secret_key, algorithm='HS256')
-
-    # Store the token and user/device information in Airtable
-    RawData = {"user": device, "auth": f"'device':{device}, 'rand':{num}"}
-    table.create(RawData)
-    logging.info('Registering new device: %s', device)
-
-    return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token:": token})
+    if device is not None:
+        # Create a JWT token with user/device information
+        import datetime
+        expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=36500)
+        num = random.random()
+        token = jwt.encode({'device':device, 'rand':num}, jwt_secret_key, algorithm='HS256')
+    
+        # Store the token and user/device information in Airtable
+        RawData = {"user": device, "auth": f"'device':{device}, 'rand':{num}"}
+        table.create(RawData)
+        logging.info('Registering new device: %s', device)
+    
+        return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token:": token})
+    else:
+        return jsonify({"message": "Missing the device parameter)
     
 # Trigger route
 @app.route('/api/v1/trigger', methods=["POST"])
