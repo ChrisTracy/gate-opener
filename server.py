@@ -86,7 +86,8 @@ def verify_token(token):
         logging.info(f"{payload} is attempting to authenticate!")
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
-        rand_number_str = rand_value_str.replace('rand: ', '')
+        device_str = payload.get('device')
+        logging.info(f"{device_str}")
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
             logging.info(f"Token found! Auth Successful.")
