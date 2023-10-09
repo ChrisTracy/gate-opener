@@ -170,7 +170,7 @@ def trigger():
 @auth.login_required
 def refreshTokens():
     try:
-        logging.info(f'Manually refreshing tokens from AirTable. API call made by {current_user_name}')
+        logging.info('Getting tokens from AirTable')
         at_api_key = os.environ['AT_API_KEY']
         AT_BaseID = os.environ['BASE_ID']
         AT_TableName = os.environ['TABLE_NAME']
@@ -199,7 +199,7 @@ def refreshTokens():
                 authVal = ATcontent['fields']['auth']
                 user_auth_dict[userVal] = authVal
                 auths.append(authVal)
-
+                
 # Start server
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5151)
