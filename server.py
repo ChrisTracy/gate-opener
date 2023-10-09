@@ -63,10 +63,20 @@ def getTokens():
 
                 if "auth" in ATcontent['fields']:
                     authVal = ATcontent['fields']['auth']
-                    auth_parts = authVal.split(', ')
-                    rand_value = float(auth_parts[0].split(': ')[1])
-                    user = auth_parts[1].split(': ')[1]
-                    rand_to_user_mapping[rand_value] = user
+                    
+                    # Check if the authVal string contains the expected format
+                    if ": " in authVal:
+                        auth_parts = authVal.split(', ')
+                        rand_value_str = auth_parts[0].split(': ')[1].strip()  # Extract rand value as string
+                        user_str = auth_parts[1].split(': ')[1].strip()  # Extract user value as string
+                        
+                        try:
+                            rand_value = float(rand_value_str)  # Convert rand value to float
+                            rand_to_user_mapping[rand_value] = user_str  # Build the mapping
+                        except ValueError:
+                            logging.error(f"Invalid rand value: {rand_value_str}")
+                    else:
+                        logging.error(f"Invalid authVal format: {authVal}")
                         
     threading.Timer(Token_Interval, getTokens).start()
 
