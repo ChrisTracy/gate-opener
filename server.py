@@ -105,14 +105,15 @@ def get_user_by_device(ATcontents, desired_device_name):
 
 # Verify token using JWT
 @auth.verify_token
+@auth.verify_token
 def verify_token(token):
     try:
         payload = jwt.decode(token, jwt_secret_key, algorithms=['HS256'])
-        logging.info(f"{payload} is attempting to authenticate!")
+        logging.info(f"Token payload: {payload}")
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         device_str = payload.get('device')
-        logging.info(f"{device_str}")
+        logging.info(f"Device: {device_str}")
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
             global current_user_name
