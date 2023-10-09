@@ -53,10 +53,10 @@ def getTokens():
         logging.exception("Could not reach Airtable!")
 
     if ATcontents is not None:
-        for ATconent in ATcontents:
-            if "enabled" in ATconent['fields']:
-                userVal = ATconent['fields']['user']
-                authVal = ATconent['fields']['auth']
+        for ATcontent in ATcontents:
+            if "enabled" in ATcontent['fields']:
+                userVal = ATcontent['fields']['user']
+                authVal = ATcontent['fields']['auth']
                 auths.append(authVal)
 
             if "fields" in ATcontent and "rand" in ATcontent['fields'] and "user" in ATcontent['fields']:
@@ -166,10 +166,10 @@ def refreshTokens():
         logging.exception("Could not reach Airtable!")
 
     if ATcontents is not None:
-        for ATconent in ATcontents:
-            if "enabled" in ATconent['fields']:
-                userVal = ATconent['fields']['user']
-                authVal = ATconent['fields']['auth']
+        for ATcontent in ATcontents:
+            if "enabled" in ATcontent['fields']:
+                userVal = ATcontent['fields']['user']
+                authVal = ATcontent['fields']['auth']
                 auths.append(authVal)
 
             if "fields" in ATcontent and "rand" in ATcontent['fields'] and "user" in ATcontent['fields']:
