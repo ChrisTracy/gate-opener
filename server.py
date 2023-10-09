@@ -92,7 +92,7 @@ def verify_token(token):
                     rand_value = float(user_data.split('"rand":')[1])
                     print(rand_value)
                     if rand_value == rand_value_str:
-                        current_user_name = user
+                        global current_user_name = user
                         break  # Exit the loop if a match is found
                 except (ValueError, IndexError):
                     pass  # Skip invalid or missing "rand" values
@@ -142,7 +142,7 @@ def trigger():
     time.sleep(.10)
     GPIO.output(pin, GPIO.LOW)
     
-    logging.info(f"{friendly_name} opened")
+    logging.info(f"{friendly_name} opened by {current_user_name}")
     return (f"{friendly_name} opened")
 # Refresh token route
 @app.route('/api/v1/refreshtokens', methods=["POST"])
