@@ -102,7 +102,7 @@ def verify_token(token):
         if is_rand_in_auth:
             global authenticated_user_name
             authenticated_user_name = rand_to_user_mapping.get(rand_value_str)
-            logging.info("Token found! Auth Succesful")
+            logging.info(f"Token found! Auth Successful. authenticated_user_name = {authenticated_user_name}")
             return True
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
