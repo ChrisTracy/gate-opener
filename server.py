@@ -48,6 +48,9 @@ def getTokens():
 
         global user_auth_dict
         user_auth_dict = {}
+
+        global current_user_name
+        current_user_name = None
     
     except:
         logging.exception("Could not reach Airtable!")
@@ -92,7 +95,7 @@ def verify_token(token):
                     rand_value = float(user_data.split('"rand":')[1])
                     print(rand_value)
                     if rand_value == rand_value_str:
-                        global current_user_name = user
+                        current_user_name = user
                         break  # Exit the loop if a match is found
                 except (ValueError, IndexError):
                     pass  # Skip invalid or missing "rand" values
