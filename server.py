@@ -62,13 +62,15 @@ def getTokens():
                 if "fields" in ATcontent and "auth" in ATcontent['fields']:
                     auth_value = ATcontent['fields']['auth']
                     try:
-                        auth_dict = eval(f"{{{auth_value}}}")
+                        # Parse the auth_value as a dictionary
+                        auth_dict = ast.literal_eval("{" + auth_value + "}")
                         rand_value = auth_dict.get('rand')
                         user = ATcontent['fields']['user']
                         if rand_value is not None:
                             rand_to_user_mapping[rand_value] = user
                     except Exception as e:
-                        logging.error(f"Error processing auth value: {e}")     
+                        # Handle any exceptions that may occur during evaluation or parsing
+                        logging.error(f"Error processing auth value: {e}")  
                         
     threading.Timer(Token_Interval, getTokens).start()
 
@@ -179,15 +181,17 @@ def refreshTokens():
                 auths.append(authVal)
 
                 if "fields" in ATcontent and "auth" in ATcontent['fields']:
-                        auth_value = ATcontent['fields']['auth']
-                        try:
-                            auth_dict = eval(f"{{{auth_value}}}")
-                            rand_value = auth_dict.get('rand')
-                            user = ATcontent['fields']['user']
-                            if rand_value is not None:
-                                rand_to_user_mapping[rand_value] = user
-                        except Exception as e:
-                            logging.error(f"Error processing auth value: {e}") 
+                    auth_value = ATcontent['fields']['auth']
+                    try:
+                        # Parse the auth_value as a dictionary
+                        auth_dict = ast.literal_eval("{" + auth_value + "}")
+                        rand_value = auth_dict.get('rand')
+                        user = ATcontent['fields']['user']
+                        if rand_value is not None:
+                            rand_to_user_mapping[rand_value] = user
+                    except Exception as e:
+                        # Handle any exceptions that may occur during evaluation or parsing
+                        logging.error(f"Error processing auth value: {e}")
 
         return "Tokens updated. Request made by {}!".format(auth.current_user())
 
