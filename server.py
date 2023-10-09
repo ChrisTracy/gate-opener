@@ -117,7 +117,7 @@ def verify_token(token):
         if is_rand_in_auth:
             global current_user_name
             current_user_name = get_user_by_device(ATcontents, device_str)
-            logging.info(f"Token found! Auth Successful.")
+            logging.info(f"Token found! Auth Successful for {current_user_name}")
             return True
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
@@ -131,7 +131,7 @@ def verify_token(token):
 @auth.login_required
 def index():
     current_user = auth.current_user()
-    return f"Your login to {friendly_name} was successful!"
+    return f"Hello {current_user_name}. You login to {friendly_name} was successful!"
 
 # Register route - Issue tokens
 @app.route('/api/v1/register', methods=["POST"])
@@ -148,7 +148,7 @@ def register():
         # Store the token and user/device information in Airtable
         RawData = {"user": device, "auth": f"\"device\":\"{device}\", \"rand\":{num}"}
         table.create(RawData)
-        logging.info('Registering new device: %s', device)
+        logging.info(f'Registering new device: {device}')
     
         return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
     else:
@@ -164,13 +164,13 @@ def trigger():
     GPIO.output(pin, GPIO.LOW)
     
     logging.info(f"{friendly_name} opened by {current_user_name}")
-    return (f"{friendly_name} opened")
+    return (f"{friendly_name} opened by {current_user_name}")
 # Refresh token route
 @app.route('/api/v1/refreshtokens', methods=["POST"])
 @auth.login_required
 def refreshTokens():
     try:
-        logging.info('Getting tokens from AirTable')
+        logging.info(f'Manually refreshing tokens from AirTable. API call made by {current_user_name}')
         at_api_key = os.environ['AT_API_KEY']
         AT_BaseID = os.environ['BASE_ID']
         AT_TableName = os.environ['TABLE_NAME']
@@ -179,11 +179,19 @@ def refreshTokens():
 
         global table
         table = Table(api_key=at_api_key, base_id=AT_BaseID, table_name=AT_TableName)
+
+        global ATcontents
         ATcontents = table.all()
 
         global auths
         auths = []
-        
+
+        global user_auth_dict
+        user_auth_dict = {}
+
+        global current_user_name
+        current_user_name = None
+    
     except:
         logging.exception("Could not reach Airtable!")
 
@@ -192,9 +200,10 @@ def refreshTokens():
             if "enabled" in ATcontent['fields']:
                 userVal = ATcontent['fields']['user']
                 authVal = ATcontent['fields']['auth']
-                auths.append(authVal)            
+                user_auth_dict[userVal] = authVal
+                auths.append(authVal)           
 
-        return "Tokens updated. Request made by {}!".format(auth.current_user())
+        return f"Tokens manually updated")
 
 # Start server
 if __name__ == "__main__":
