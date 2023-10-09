@@ -112,7 +112,7 @@ def register():
         table.create(RawData)
         logging.info('Registering new device: %s', device)
     
-        return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token:": token})
+        return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
     else:
         return jsonify({"message": "Missing the device parameter)
     
@@ -126,8 +126,7 @@ def trigger():
     GPIO.output(pin, GPIO.LOW)
     current_user = auth.current_user()
     logging.info(f"{friendly_name} opened by {current_user}!")
-    return f"{friendly_name} opened by {current_user}!"
-
+    return None
 # Refresh token route
 @app.route('/api/v1/refreshtokens', methods=["POST"])
 @auth.login_required
