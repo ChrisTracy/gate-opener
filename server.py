@@ -87,22 +87,11 @@ def verify_token(token):
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         prefix = "rand: "
-        rand_number_str = rand_value_str[len(prefix):]
+        rand_number_str = str(rand_value_str[len(prefix):])
         logging.info(f"rand: {rand_number_str}")
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
             logging.info(f"Token found! Auth Successful.")
-            ##
-            for user, user_data in user_auth_dict.items():
-                try:
-                    rand_value = (user_data.split('"rand":')[1])
-                    logging.info(f"rand: {rand_value}")
-                    if rand_value == rand_number_str:
-                        current_user_name = user
-                        break  # Exit the loop if a match is found
-                except (ValueError, IndexError):
-                    pass  # Skip invalid or missing "rand" values
-            ##
             return True
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
