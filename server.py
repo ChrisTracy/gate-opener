@@ -18,7 +18,7 @@ pin = int(os.environ['GPIO_PIN'])
 
 # Set JWT secret key (keep this secret) and client token expiration
 jwt_secret_key = os.environ['JWT_SECRET_KEY']
-JWT_EXPIRATION_DAYS = int(os.environ.get('JWT_EXPIRATION_DAYS', 1))
+JWT_EXPIRATION_DAYS = int(os.environ.get('JWT_EXPIRATION_DAYS', 365))
 
 # Function to pull tokens
 def get_tokens():
@@ -135,7 +135,7 @@ def register():
 
     if device is not None:
         # Create a JWT token with user/device information
-        expiration_time = datetime.datetime.utcnow() + datetime.timedelta(days=JWT_EXPIRATION_DAYS)
+        expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=JWT_EXPIRATION_DAYS)
         num = random.random()
         token = jwt.encode({'device': device, 'rand': num}, jwt_secret_key, algorithm='HS256')
 
