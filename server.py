@@ -2,6 +2,7 @@ import os
 import threading
 import time
 import logging
+import json
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPTokenAuth
 from waitress import serve
@@ -62,15 +63,16 @@ def getTokens():
                 if "fields" in ATcontent and "auth" in ATcontent['fields']:
                     auth_value = ATcontent['fields']['auth']
                     try:
-                        # Parse the auth_value as a dictionary
-                        auth_dict = ast.literal_eval("{" + auth_value + "}")
-                        rand_value = auth_dict.get('rand')
+                        # Parse the auth_value as JSON
+                        auth_data = json.loads("{" + auth_value + "}")
+                        rand_value = auth_data.get('rand')
                         user = ATcontent['fields']['user']
+                        
                         if rand_value is not None:
                             rand_to_user_mapping[rand_value] = user
-                    except Exception as e:
-                        # Handle any exceptions that may occur during evaluation or parsing
-                        logging.error(f"Error processing auth value: {e}")  
+                    except json.JSONDecodeError as e:
+                        # Handle JSON parsing errors
+                        logging.error(f"Error parsing JSON in auth value: {e}")
                         
     threading.Timer(Token_Interval, getTokens).start()
 
@@ -180,18 +182,19 @@ def refreshTokens():
                 authVal = ATcontent['fields']['auth']
                 auths.append(authVal)
 
-                if "fields" in ATcontent and "auth" in ATcontent['fields']:
+               if "fields" in ATcontent and "auth" in ATcontent['fields']:
                     auth_value = ATcontent['fields']['auth']
                     try:
-                        # Parse the auth_value as a dictionary
-                        auth_dict = ast.literal_eval("{" + auth_value + "}")
-                        rand_value = auth_dict.get('rand')
+                        # Parse the auth_value as JSON
+                        auth_data = json.loads("{" + auth_value + "}")
+                        rand_value = auth_data.get('rand')
                         user = ATcontent['fields']['user']
+                        
                         if rand_value is not None:
                             rand_to_user_mapping[rand_value] = user
-                    except Exception as e:
-                        # Handle any exceptions that may occur during evaluation or parsing
-                        logging.error(f"Error processing auth value: {e}")
+                    except json.JSONDecodeError as e:
+                        # Handle JSON parsing errors
+                        logging.error(f"Error parsing JSON in auth value: {e}")
 
         return "Tokens updated. Request made by {}!".format(auth.current_user())
 
