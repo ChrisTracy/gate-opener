@@ -13,31 +13,19 @@ import jwt
 
 # Set GPIO pin and friendly name
 friendly_name = os.environ['FRIENDLY_NAME']
-pin = os.environ['GPIO_PIN']
-pin = int(pin)
+pin = int(os.environ['GPIO_PIN'])
 
 # Set JWT secret key (keep this secret)
 jwt_secret_key = os.environ['JWT_SECRET_KEY']
 
-# Setup console logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler("debug.log"),
-        logging.StreamHandler()
-    ]
-)
-
 # Function to pull tokens
-def getTokens():
+def get_tokens():
     try:
         logging.info('Getting tokens from AirTable')
         at_api_key = os.environ['AT_API_KEY']
         AT_BaseID = os.environ['BASE_ID']
         AT_TableName = os.environ['TABLE_NAME']
-        Token_Interval = os.environ['TOKEN_INTERVAL']
-        Token_Interval = int(Token_Interval)
+        Token_Interval = int(os.environ['TOKEN_INTERVAL'])
 
         global table
         table = Table(api_key=at_api_key, base_id=AT_BaseID, table_name=AT_TableName)
@@ -53,22 +41,37 @@ def getTokens():
 
         global current_user_name
         current_user_name = None
-    
-    except:
-        logging.exception("Could not reach Airtable!")
 
-    if ATcontents is not None:
-        for ATcontent in ATcontents:
-            if "enabled" in ATcontent['fields']:
-                userVal = ATcontent['fields']['user']
-                authVal = ATcontent['fields']['auth']
-                user_auth_dict[userVal] = authVal
-                auths.append(authVal)
-                        
-    threading.Timer(Token_Interval, getTokens).start()
+        if ATcontents is not None:
+            for ATcontent in ATcontents:
+                if "enabled" in ATcontent['fields']:
+                    userVal = ATcontent['fields']['user']
+                    authVal = ATcontent['fields']['auth']
+                    user_auth_dict[userVal] = authVal
+                    auths.append(authVal)
+
+        threading.Timer(Token_Interval, get_tokens).start()
+
+    except Exception as e:
+        logging.exception("Could not reach Airtable: %s", str(e))
+
+# Setup console logging and file logging
+log_format = "%(asctime)s [%(levelname)s] %(message)s"
+log_file_debug = "debug.log"
+log_file_info = "info.log"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format=log_format,
+    handlers=[
+        logging.FileHandler(log_file_debug),
+        logging.FileHandler(log_file_info),
+        logging.StreamHandler()
+    ]
+)
 
 # Run get tokens
-getTokens()
+get_tokens()
 
 # Setup GPIO
 logging.info('Setting up GPIO on pin %s', pin)
@@ -80,27 +83,19 @@ GPIO.output(pin, GPIO.LOW)
 app = Flask(__name__)
 auth = HTTPTokenAuth(scheme='Bearer')
 
-#get user by their device
+# Helper function to get user by their device
 def get_user_by_device(ATcontents, desired_device_name):
-    # Iterate through 'ATcontents'
     for user_data in ATcontents:
         if "auth" in user_data['fields']:
             auth_val = user_data['fields']['auth']
             try:
-                # Parse the 'auth' value as JSON
                 auth_data = json.loads("{" + auth_val + "}")
-
-                # Check if the 'device' field in auth_data matches the desired device name
                 if auth_data.get('device') == desired_device_name:
-                    # If it matches, return the 'user' field as a string
                     user_name = user_data['fields'].get('user')
                     if user_name:
                         return user_name
             except json.JSONDecodeError:
-                # Handle invalid JSON data in 'auth' field if necessary
                 pass
-
-    # If no matching user is found, return None
     return None
 
 # Verify token using JWT
@@ -108,16 +103,16 @@ def get_user_by_device(ATcontents, desired_device_name):
 def verify_token(token):
     try:
         payload = jwt.decode(token, jwt_secret_key, algorithms=['HS256'])
-        logging.info(f"Token payload: {payload}")
+        logging.info("Token payload: %s", payload)
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         device_str = payload.get('device')
-        logging.info(f"Device: {device_str}")
+        logging.info("Device: %s", device_str)
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
             global current_user_name
             current_user_name = get_user_by_device(ATcontents, device_str)
-            logging.info(f"Token found! Auth Successful for {current_user_name}")
+            logging.info("Token found! Auth Successful for %s", current_user_name)
             return True
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
@@ -131,7 +126,7 @@ def verify_token(token):
 @auth.login_required
 def index():
     current_user = auth.current_user()
-    return f"Hello {current_user_name}. You login to {friendly_name} was successful!"
+    return f"Hello {current_user_name}. You logged in to {friendly_name} successfully!"
 
 # Register route - Issue tokens
 @app.route('/api/v1/register', methods=["POST"])
@@ -143,39 +138,39 @@ def register():
         import datetime
         expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=36500)
         num = random.random()
-        token = jwt.encode({'device':device, 'rand':num}, jwt_secret_key, algorithm='HS256')
-    
+        token = jwt.encode({'device': device, 'rand': num}, jwt_secret_key, algorithm='HS256')
+
         # Store the token and user/device information in Airtable
         RawData = {"user": device, "auth": f"\"device\":\"{device}\", \"rand\":{num}"}
         table.create(RawData)
-        logging.info(f'Registering new device: {device}')
-    
+        logging.info('Registering new device: %s', device)
+
         return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
     else:
         return jsonify({"message": "Missing the device parameter"})
-    
+
 # Trigger route
 @app.route('/api/v1/trigger', methods=["POST"])
-@app.route('/gate/front/', methods=["POST"]) # Legacy route (will be deprecated)
+@app.route('/gate/front/', methods=["POST"])  # Legacy route (will be deprecated)
 @auth.login_required
 def trigger():
     GPIO.output(pin, GPIO.HIGH)
     time.sleep(.10)
     GPIO.output(pin, GPIO.LOW)
-    
-    logging.info(f"{friendly_name} opened by {current_user_name}")
-    return (f"{friendly_name} opened by {current_user_name}")
+
+    logging.info("%s opened by %s", friendly_name, current_user_name)
+    return f"{friendly_name} opened by {current_user_name}"
+
 # Refresh token route
 @app.route('/api/v1/refreshtokens', methods=["POST"])
 @auth.login_required
-def refreshTokens():
+def refresh_tokens():
     try:
-        logging.info(f'Token refresh requested by {current_user_name}')
+        logging.info('Token refresh requested by %s', current_user_name)
         at_api_key = os.environ['AT_API_KEY']
         AT_BaseID = os.environ['BASE_ID']
         AT_TableName = os.environ['TABLE_NAME']
-        Token_Interval = os.environ['TOKEN_INTERVAL']
-        Token_Interval = int(Token_Interval)
+        Token_Interval = int(os.environ['TOKEN_INTERVAL'])
 
         global table
         table = Table(api_key=at_api_key, base_id=AT_BaseID, table_name=AT_TableName)
@@ -188,20 +183,20 @@ def refreshTokens():
 
         global user_auth_dict
         user_auth_dict = {}
-    
-    except:
-        logging.exception("Could not reach Airtable!")
 
-    if ATcontents is not None:
-        for ATcontent in ATcontents:
-            if "enabled" in ATcontent['fields']:
-                userVal = ATcontent['fields']['user']
-                authVal = ATcontent['fields']['auth']
-                user_auth_dict[userVal] = authVal
-                auths.append(authVal)
-        logging.info(f'Tokens were manually refreshed by {current_user_name}')
-        return (f"Tokens were manually refreshed by {current_user_name}")
-                
+        if ATcontents is not None:
+            for ATcontent in ATcontents:
+                if "enabled" in ATcontent['fields']:
+                    userVal = ATcontent['fields']['user']
+                    authVal = ATcontent['fields']['auth']
+                    user_auth_dict[userVal] = authVal
+                    auths.append(authVal)
+        logging.info('Tokens were manually refreshed by %s', current_user_name)
+        return f"Tokens were manually refreshed by {current_user_name}"
+
+    except Exception as e:
+        logging.exception("Could not reach Airtable: %s", str(e))
+
 # Start server
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5151)
