@@ -59,8 +59,14 @@ def getTokens():
             if "enabled" in ATcontent['fields']:
                 userVal = ATcontent['fields']['user']
                 authVal = ATcontent['fields']['auth']
-                
                 auths.append(authVal)
+
+                if "auth" in ATcontent['fields']:
+                    authVal = ATcontent['fields']['auth']
+                    auth_parts = authVal.split(', ')
+                    rand_value = float(auth_parts[0].split(': ')[1])
+                    user = auth_parts[1].split(': ')[1]
+                    rand_to_user_mapping[rand_value] = user
                         
     threading.Timer(Token_Interval, getTokens).start()
 
@@ -132,7 +138,10 @@ def trigger():
     GPIO.output(pin, GPIO.HIGH)
     time.sleep(.10)
     GPIO.output(pin, GPIO.LOW)
-    current_user = auth.current_user()
+    
+    rand_value = float(current_user.split(': ')[1])
+    authenticated_user_name = rand_to_user_mapping.get(rand_value)
+    
     logging.info(f"{friendly_name} opened by {authenticated_user_name}!")
     return (f"{friendly_name} opened")
 # Refresh token route
