@@ -201,9 +201,7 @@ def refreshTokens():
                 userVal = ATcontent['fields']['user']
                 authVal = ATcontent['fields']['auth']
                 user_auth_dict[userVal] = authVal
-                auths.append(authVal)           
-
-        return f"Tokens manually updated")
+                auths.append(authVal)
 
 # Start server
 if __name__ == "__main__":
