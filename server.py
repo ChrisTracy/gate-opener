@@ -18,6 +18,7 @@ pin = int(pin)
 
 # Set JWT secret key (keep this secret)
 jwt_secret_key = os.environ['JWT_SECRET_KEY']
+authenticated_user_name = None
 
 # Setup console logging
 logging.basicConfig(
