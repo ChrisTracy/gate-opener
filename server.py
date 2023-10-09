@@ -86,6 +86,8 @@ def verify_token(token):
         logging.info(f"{payload} is attempting to authenticate!")
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
+        prefix = "rand: "
+        rand_number_str = text[len(rand_value_str):]
         logging.info(f"rand: {rand_value_str}")
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
@@ -95,7 +97,7 @@ def verify_token(token):
                 try:
                     rand_value = float(user_data.split('"rand":')[1])
                     print(rand_value)
-                    if rand_value == rand_value_str:
+                    if rand_value == rand_number_str:
                         current_user_name = user
                         break  # Exit the loop if a match is found
                 except (ValueError, IndexError):
