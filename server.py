@@ -112,11 +112,11 @@ def verify_token(token):
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         device_str = payload.get('device')
-        current_user_name = get_user_by_device(ATcontents, device_str)
         logging.info(f"{device_str}")
-        logging.info(f"{current_user_name}")
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
+            global current_user_name
+            current_user_name = get_user_by_device(ATcontents, device_str)
             logging.info(f"Token found! Auth Successful.")
             return True
     except jwt.ExpiredSignatureError:
