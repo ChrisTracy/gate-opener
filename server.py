@@ -87,7 +87,7 @@ def verify_token(token):
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         prefix = "rand: "
-        rand_number_str = text[len(rand_value_str):]
+        rand_number_str = rand_value_str[len(rand_value_str):]
         logging.info(f"rand: {rand_value_str}")
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
