@@ -103,7 +103,6 @@ def get_user_by_device(ATcontents, desired_device_name):
 def verify_token(token):
     try:
         payload = jwt.decode(token, jwt_secret_key, algorithms=['HS256'])
-        logging.info("Token payload: %s", payload)
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         device_str = payload.get('device')
