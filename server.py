@@ -126,7 +126,7 @@ def trigger():
     GPIO.output(pin, GPIO.LOW)
     current_user = auth.current_user()
     logging.info(f"{friendly_name} opened by {current_user}!")
-    return ('', 204)
+    return (f"{friendly_name} opened")
 # Refresh token route
 @app.route('/api/v1/refreshtokens', methods=["POST"])
 @auth.login_required
