@@ -78,6 +78,29 @@ GPIO.output(pin, GPIO.LOW)
 app = Flask(__name__)
 auth = HTTPTokenAuth(scheme='Bearer')
 
+#get user by their device
+def get_user_by_device(ATcontents, desired_device_name):
+    # Iterate through 'ATcontents'
+    for user_data in ATcontents:
+        if "auth" in user_data['fields']:
+            auth_val = user_data['fields']['auth']
+            try:
+                # Parse the 'auth' value as JSON
+                auth_data = json.loads("{" + auth_val + "}")
+
+                # Check if the 'device' field in auth_data matches the desired device name
+                if auth_data.get('device') == desired_device_name:
+                    # If it matches, return the 'user' field as a string
+                    user_name = user_data['fields'].get('user')
+                    if user_name:
+                        return user_name
+            except json.JSONDecodeError:
+                # Handle invalid JSON data in 'auth' field if necessary
+                pass
+
+    # If no matching user is found, return None
+    return None
+
 # Verify token using JWT
 @auth.verify_token
 def verify_token(token):
@@ -87,6 +110,7 @@ def verify_token(token):
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         device_str = payload.get('device')
+        current_user_name = get_user_by_device(ATcontents, device_str)
         logging.info(f"{device_str}")
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
