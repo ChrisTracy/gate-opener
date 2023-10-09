@@ -41,6 +41,8 @@ def getTokens():
 
         global table
         table = Table(api_key=at_api_key, base_id=AT_BaseID, table_name=AT_TableName)
+
+        global ATcontents
         ATcontents = table.all()
 
         global auths
