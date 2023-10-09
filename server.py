@@ -188,9 +188,6 @@ def refreshTokens():
 
         global user_auth_dict
         user_auth_dict = {}
-
-        global current_user_name
-        current_user_name = None
     
     except:
         logging.exception("Could not reach Airtable!")
