@@ -74,8 +74,9 @@ services:
     privileged: true
     environment:
       AT_API_KEY: "<AirTable_Token>" #Airtable token (generate in the airtable dev portal and grant it access to the table)
+      JWT_SECRET_KEY: "<JWT_Secret_Key>" This can be anything but make it long, random, and secure.
       BASE_ID: "<AirTable_Base_ID>" #Airtable Base ID (found in the URL)
-      TABLE_NAME: "users" #Airtable name
+      TABLE_NAME: "users" #Airtable table name
       GPIO_PIN: "16" #GPIO PIN
       TOKEN_INTERVAL: "5400" #how long in seconds before pulling in new tokens. (Free version has a limit of 1000 calls a month)
 
@@ -115,6 +116,6 @@ These are the api endpoints for the server:
 | Method   | URL                                      | Description                                             | Auth | Params |
 | -------- | ---------------------------------------- | --------------------------------------------------------| ---- | ------ |
 | `GET`    | `/api/v1/hello`                          | Sends an authorized reuest to the server to test access.|:heavy_check_mark:|       |
-| `POST`   | `/api/v1/register`                       | Registers a new device/key to the Airtable. Admin approval is required in Airtable after this is completed |      | device, key       |
+| `POST`   | `/api/v1/register`                       | Registers a new device/key to the Airtable. Admin approval is required in Airtable after this is completed |      | device      |
 | `POST`   | `/api/v1/trigger`                        | Triggers the relay.                                     |:heavy_check_mark:|        |
 | `POST`   | `/api/v1/refreshtokens`                  | Refreshes the tokens from Airtable.                     |:heavy_check_mark:|        |
