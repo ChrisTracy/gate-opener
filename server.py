@@ -44,6 +44,11 @@ def getTokens():
 
         global auths
         auths = []
+
+        # Create a dictionary to store the mapping of rand to user
+        global rand_to_user_mapping
+        rand_to_user_mapping = {}
+        
     except:
         logging.exception("Could not reach Airtable!")
 
@@ -53,6 +58,11 @@ def getTokens():
                 userVal = ATconent['fields']['user']
                 authVal = ATconent['fields']['auth']
                 auths.append(authVal)
+
+            if "fields" in ATcontent and "rand" in ATcontent['fields'] and "user" in ATcontent['fields']:
+                rand_value = ATcontent['fields']['rand']
+                user = ATcontent['fields']['user']
+                rand_to_user_mapping[rand_value] = user         
 
     threading.Timer(Token_Interval, getTokens).start()
 
@@ -79,6 +89,8 @@ def verify_token(token):
         rand_value_str = str(numAuth)
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
+            global authenticated_user_name
+            authenticated_user_name = rand_to_user_mapping.get(rand_value_str)
             logging.info("Token found! Auth Succesful")
             return True
     except jwt.ExpiredSignatureError:
@@ -125,7 +137,7 @@ def trigger():
     time.sleep(.10)
     GPIO.output(pin, GPIO.LOW)
     current_user = auth.current_user()
-    logging.info(f"{friendly_name} opened by {current_user}!")
+    logging.info(f"{friendly_name} opened by {authenticated_user_name}!")
     return (f"{friendly_name} opened")
 # Refresh token route
 @app.route('/api/v1/refreshtokens', methods=["POST"])
@@ -145,6 +157,11 @@ def refreshTokens():
 
         global auths
         auths = []
+
+        # Create a dictionary to store the mapping of rand to user
+        global rand_to_user_mapping
+        rand_to_user_mapping = {}
+        
     except:
         logging.exception("Could not reach Airtable!")
 
@@ -154,6 +171,11 @@ def refreshTokens():
                 userVal = ATconent['fields']['user']
                 authVal = ATconent['fields']['auth']
                 auths.append(authVal)
+
+            if "fields" in ATcontent and "rand" in ATcontent['fields'] and "user" in ATcontent['fields']:
+                rand_value = ATcontent['fields']['rand']
+                user = ATcontent['fields']['user']
+                rand_to_user_mapping[rand_value] = user  
 
         return "Tokens updated. Request made by {}!".format(auth.current_user())
 
