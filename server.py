@@ -61,20 +61,6 @@ def getTokens():
                 authVal = ATcontent['fields']['auth']
                 
                 auths.append(authVal)
-
-                if "fields" in ATcontent and "auth" in ATcontent['fields']:
-                    auth_value = ATcontent['fields']['auth']
-                    try:
-                        # Parse the auth_value as JSON
-                        auth_data = json.loads("{" + auth_value + "}")
-                        rand_value = auth_data.get('rand')
-                        user = ATcontent['fields']['user']
-                        logging.info(f"rand_value: {rand_value}, user: {user}")
-                        if rand_value is not None:
-                            rand_to_user_mapping[rand_value] = user
-                    except json.JSONDecodeError as e:
-                        # Handle JSON parsing errors
-                        logging.error(f"Error parsing JSON in auth value: {e}")
                         
     threading.Timer(Token_Interval, getTokens).start()
 
@@ -101,9 +87,7 @@ def verify_token(token):
         rand_value_str = str(numAuth)
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
-            global authenticated_user_name
-            authenticated_user_name = rand_to_user_mapping.get(str(numAuth))
-            logging.info(f"Token found! Auth Successful. authenticated_user_name = {authenticated_user_name}")
+            logging.info(f"Token found! Auth Successful.")
             return True
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
@@ -169,10 +153,6 @@ def refreshTokens():
 
         global auths
         auths = []
-
-        # Create a dictionary to store the mapping of rand to user
-        global rand_to_user_mapping
-        rand_to_user_mapping = {}
         
     except:
         logging.exception("Could not reach Airtable!")
@@ -182,23 +162,7 @@ def refreshTokens():
             if "enabled" in ATcontent['fields']:
                 userVal = ATcontent['fields']['user']
                 authVal = ATcontent['fields']['auth']
-                auths.append(authVal)
-
-                if "fields" in ATcontent and "auth" in ATcontent['fields']:
-                    auth_value = ATcontent['fields']['auth']
-                    try:
-                        # Parse the auth_value as JSON
-                        auth_data = json.loads("{" + auth_value + "}")
-                        rand_value = auth_data.get('rand')
-                        user = ATcontent['fields']['user']
-                        
-                        if rand_value is not None:
-                            rand_to_user_mapping[rand_value] = user
-                    except json.JSONDecodeError as e:
-                        # Handle JSON parsing errors
-                        logging.error(f"Error parsing JSON in auth value: {e}")
-
-            
+                auths.append(authVal)            
 
         return "Tokens updated. Request made by {}!".format(auth.current_user())
 
