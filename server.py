@@ -107,7 +107,6 @@ def verify_token(token):
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         device_str = payload.get('device')
-        logging.info("Device: %s", device_str)
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
             global current_user_name
