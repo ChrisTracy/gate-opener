@@ -64,12 +64,12 @@ def getTokens():
 
                 if "fields" in ATcontent and "auth" in ATcontent['fields']:
                     auth_value = ATcontent['fields']['auth']
-                    logging.info(auth_value)
                     try:
                         # Parse the auth_value as JSON
                         auth_data = json.loads("{" + auth_value + "}")
                         rand_value = auth_data.get('rand')
                         user = ATcontent['fields']['user']
+                        logging.info(f"rand_value: {rand_value}, user: {user}")
                         if rand_value is not None:
                             rand_to_user_mapping[rand_value] = user
                     except json.JSONDecodeError as e:
