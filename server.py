@@ -18,7 +18,6 @@ pin = int(pin)
 
 # Set JWT secret key (keep this secret)
 jwt_secret_key = os.environ['JWT_SECRET_KEY']
-authenticated_user_name = None
 
 # Setup console logging
 logging.basicConfig(
@@ -46,10 +45,6 @@ def getTokens():
 
         global auths
         auths = []
-
-        # Create a dictionary to store the mapping of rand to user
-        global rand_to_user_mapping
-        rand_to_user_mapping = {}
         
     except:
         logging.exception("Could not reach Airtable!")
@@ -60,23 +55,6 @@ def getTokens():
                 userVal = ATcontent['fields']['user']
                 authVal = ATcontent['fields']['auth']
                 auths.append(authVal)
-
-                if "auth" in ATcontent['fields']:
-                    authVal = ATcontent['fields']['auth']
-                    
-                    # Check if the authVal string contains the expected format
-                    if ": " in authVal:
-                        auth_parts = authVal.split(', ')
-                        rand_value_str = auth_parts[0].split(': ')[1].strip()  # Extract rand value as string
-                        user_str = auth_parts[1].split(': ')[1].strip()  # Extract user value as string
-                        
-                        try:
-                            rand_value = float(rand_value_str)  # Convert rand value to float
-                            rand_to_user_mapping[rand_value] = user_str  # Build the mapping
-                        except ValueError:
-                            logging.error(f"Invalid rand value: {rand_value_str}")
-                    else:
-                        logging.error(f"Invalid authVal format: {authVal}")
                         
     threading.Timer(Token_Interval, getTokens).start()
 
@@ -149,10 +127,7 @@ def trigger():
     time.sleep(.10)
     GPIO.output(pin, GPIO.LOW)
     
-    rand_value = float(current_user.split(': ')[1])
-    authenticated_user_name = rand_to_user_mapping.get(rand_value)
-    
-    logging.info(f"{friendly_name} opened by {authenticated_user_name}!")
+    logging.info(f"{friendly_name} opened")
     return (f"{friendly_name} opened")
 # Refresh token route
 @app.route('/api/v1/refreshtokens', methods=["POST"])
