@@ -114,7 +114,7 @@ def register():
     
         return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
     else:
-        return jsonify({"message": "Missing the device parameter)
+        return jsonify({"message": "Missing the device parameter")
     
 # Trigger route
 @app.route('/api/v1/trigger', methods=["POST"])
