@@ -45,7 +45,10 @@ def getTokens():
 
         global auths
         auths = []
-        
+
+        global user_auth_dict
+        user_auth_dict = {}
+    
     except:
         logging.exception("Could not reach Airtable!")
 
@@ -54,6 +57,7 @@ def getTokens():
             if "enabled" in ATcontent['fields']:
                 userVal = ATcontent['fields']['user']
                 authVal = ATcontent['fields']['auth']
+                user_auth_dict[userVal] = authVal
                 auths.append(authVal)
                         
     threading.Timer(Token_Interval, getTokens).start()
@@ -82,6 +86,17 @@ def verify_token(token):
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
             logging.info(f"Token found! Auth Successful.")
+            ##
+            for user, user_data in user_auth_dict.items():
+                try:
+                    rand_value = float(user_data.split('"rand":')[1])
+                    print(rand_value)
+                    if rand_value == rand_value_str:
+                        current_user_name = user
+                        break  # Exit the loop if a match is found
+                except (ValueError, IndexError):
+                    pass  # Skip invalid or missing "rand" values
+            ##
             return True
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
