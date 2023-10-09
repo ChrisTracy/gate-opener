@@ -59,11 +59,17 @@ def getTokens():
                 authVal = ATcontent['fields']['auth']
                 auths.append(authVal)
 
-            if "fields" in ATcontent and "rand" in ATcontent['fields'] and "user" in ATcontent['fields']:
-                rand_value = ATcontent['fields']['rand']
-                user = ATcontent['fields']['user']
-                rand_to_user_mapping[rand_value] = user         
-
+                if "fields" in ATcontent and "auth" in ATcontent['fields']:
+                    auth_value = ATcontent['fields']['auth']
+                    try:
+                        auth_dict = eval(f"{{{auth_value}}}")
+                        rand_value = auth_dict.get('rand')
+                        user = ATcontent['fields']['user']
+                        if rand_value is not None:
+                            rand_to_user_mapping[rand_value] = user
+                    except Exception as e:
+                        logging.error(f"Error processing auth value: {e}")     
+                        
     threading.Timer(Token_Interval, getTokens).start()
 
 # Run get tokens
@@ -172,10 +178,16 @@ def refreshTokens():
                 authVal = ATcontent['fields']['auth']
                 auths.append(authVal)
 
-            if "fields" in ATcontent and "rand" in ATcontent['fields'] and "user" in ATcontent['fields']:
-                rand_value = ATcontent['fields']['rand']
-                user = ATcontent['fields']['user']
-                rand_to_user_mapping[rand_value] = user  
+                if "fields" in ATcontent and "auth" in ATcontent['fields']:
+                        auth_value = ATcontent['fields']['auth']
+                        try:
+                            auth_dict = eval(f"{{{auth_value}}}")
+                            rand_value = auth_dict.get('rand')
+                            user = ATcontent['fields']['user']
+                            if rand_value is not None:
+                                rand_to_user_mapping[rand_value] = user
+                        except Exception as e:
+                            logging.error(f"Error processing auth value: {e}") 
 
         return "Tokens updated. Request made by {}!".format(auth.current_user())
 
