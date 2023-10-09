@@ -182,7 +182,7 @@ def refreshTokens():
                 authVal = ATcontent['fields']['auth']
                 auths.append(authVal)
 
-               if "fields" in ATcontent and "auth" in ATcontent['fields']:
+                if "fields" in ATcontent and "auth" in ATcontent['fields']:
                     auth_value = ATcontent['fields']['auth']
                     try:
                         # Parse the auth_value as JSON
@@ -195,6 +195,8 @@ def refreshTokens():
                     except json.JSONDecodeError as e:
                         # Handle JSON parsing errors
                         logging.error(f"Error parsing JSON in auth value: {e}")
+
+            
 
         return "Tokens updated. Request made by {}!".format(auth.current_user())
 
