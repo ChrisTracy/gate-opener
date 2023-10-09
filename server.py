@@ -105,7 +105,6 @@ def get_user_by_device(ATcontents, desired_device_name):
 
 # Verify token using JWT
 @auth.verify_token
-@auth.verify_token
 def verify_token(token):
     try:
         payload = jwt.decode(token, jwt_secret_key, algorithms=['HS256'])
