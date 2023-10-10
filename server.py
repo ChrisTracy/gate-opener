@@ -161,7 +161,7 @@ def register():
 
         # Store the token and user/device information in Airtable
         RawData = {"user": device, "auth": f"\"device\":\"{device}\", \"rand\":{num}"}
-        table.create(RawData)
+        api.table.create(RawData)
         logging.info('Registering new device: %s', device)
 
         return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
