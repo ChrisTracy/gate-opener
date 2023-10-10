@@ -2,7 +2,7 @@
 
 This project comes as a pre-built docker image that enables you to uitilze a relay and raspberry pi to open a gate or garage door via API call. You will need to create a table in [AirTable](https://airtable.com/) with 3 fields:
 - user (single line of text)
-- token (single line of text)
+- auth (single line of text)
 - enabled (checkbox)
 
 You will also need to generate a token from the [Airtable Dev Portal](https://airtable.com/create/tokens).
@@ -74,6 +74,8 @@ services:
     privileged: true
     environment:
       AT_API_KEY: "<AirTable_Token>" #Airtable token (generate in the airtable dev portal and grant it access to the table)
+      JWT_SECRET_KEY: "<JWT_Secret_Key>" #This can be anything but it must be long, random and kept secret
+      JWT_EXPIRATION_DAYS: "365" #Number of days before a clients JWT token will expire
       JWT_SECRET_KEY: "<JWT_Secret_Key>" This can be anything but make it long, random, and secure.
       BASE_ID: "<AirTable_Base_ID>" #Airtable Base ID (found in the URL)
       TABLE_NAME: "users" #Airtable table name
