@@ -102,7 +102,7 @@ def get_user_by_device(ATcontents, desired_device_name):
                 pass
     return None
 
-# Helper function to get user by their device
+# Helper function to get admin by their device
 def get_admin_by_device(ATcontents, desired_device_name):
     for user_data in ATcontents:
         if "auth" in user_data['fields']:
@@ -111,8 +111,8 @@ def get_admin_by_device(ATcontents, desired_device_name):
                 auth_data = json.loads("{" + auth_val + "}")
                 if auth_data.get('device') == desired_device_name:
                     admin = user_data['fields'].get('admin')
-                    if user_name:
-                        return user_name
+                    if admin:
+                        return admin
             except json.JSONDecodeError:
                 pass
     return None
