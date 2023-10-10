@@ -102,6 +102,22 @@ def get_user_by_device(ATcontents, desired_device_name):
                 pass
     return None
 
+# Helper function to get user by their device
+def get_admin_by_device(ATcontents, desired_device_name):
+    for user_data in ATcontents:
+        if "auth" in user_data['fields']:
+            auth_val = user_data['fields']['auth']
+            try:
+                auth_data = json.loads("{" + auth_val + "}")
+                if auth_data.get('device') == desired_device_name:
+                    admin = user_data['fields'].get('admin')
+                    if user_name:
+                        return user_name
+            except json.JSONDecodeError:
+                pass
+    return None
+
+
 # Verify token using JWT
 @auth.verify_token
 def verify_token(token):
@@ -114,7 +130,9 @@ def verify_token(token):
         if is_rand_in_auth:
             global current_user_name
             current_user_name = get_user_by_device(ATcontents, device_str)
+            isAdmin = get_admin_by_device(ATcontents, device_str)
             logging.info("Token found! Auth Successful for %s", current_user_name)
+            logging.info("Is Admin: %s", admin)
             return True
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
