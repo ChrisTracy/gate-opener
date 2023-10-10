@@ -7,7 +7,7 @@ import json
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPTokenAuth
 from waitress import serve
-from pyairtable import Table
+from pyairtable import Api
 import RPi.GPIO as GPIO
 import random
 import jwt
@@ -29,8 +29,9 @@ def get_tokens():
         AT_TableName = os.environ['TABLE_NAME']
         Token_Interval = int(os.environ['TOKEN_INTERVAL'])
 
-        global table
-        table = Table(api_key=at_api_key, base_id=AT_BaseID, table_name=AT_TableName)
+        global api
+        api = Api(at_api_key)
+        table = api.table(base_id=AT_BaseID, table_name=AT_TableName)
 
         global ATcontents
         ATcontents = table.all()
@@ -77,6 +78,7 @@ get_tokens()
 
 # Setup GPIO
 logging.info('Setting up GPIO on pin %s', pin)
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(pin, GPIO.OUT)
 GPIO.output(pin, GPIO.LOW)
@@ -171,8 +173,9 @@ def refresh_tokens():
         AT_TableName = os.environ['TABLE_NAME']
         Token_Interval = int(os.environ['TOKEN_INTERVAL'])
 
-        global table
-        table = Table(api_key=at_api_key, base_id=AT_BaseID, table_name=AT_TableName)
+        global api
+        api = Api(at_api_key)
+        table = api.table(base_id=AT_BaseID, table_name=AT_TableName)
 
         global ATcontents
         ATcontents = table.all()

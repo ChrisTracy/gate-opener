@@ -17,7 +17,7 @@ This is the hardware I am using. You can certainly do this with less. A pi0, jum
 - [16 Gauge Wire Combo 6 Pack](https://www.amazon.com/gp/product/B07MBWKX53)
 
 ## Wiring
-![Raspberry Pi 3 Wiring](digrams/pi-wiring.png)
+![Raspberry Pi 3 Wiring](diagrams/pi-wiring.png)
 
 ## Installation
 
