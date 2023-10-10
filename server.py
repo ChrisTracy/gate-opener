@@ -132,7 +132,7 @@ def verify_token(token):
             current_user_name = get_user_by_device(ATcontents, device_str)
             isAdmin = get_admin_by_device(ATcontents, device_str)
             logging.info("Token found! Auth Successful for %s", current_user_name)
-            logging.info("Is Admin: %s", admin)
+            logging.info("Is Admin: %s", isAdmin)
             return True
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
