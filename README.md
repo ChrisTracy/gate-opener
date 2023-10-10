@@ -76,8 +76,9 @@ services:
       AT_API_KEY: "<AirTable_Token>" #Airtable token (generate in the airtable dev portal and grant it access to the table)
       JWT_SECRET_KEY: "<JWT_Secret_Key>" #This can be anything but it must be long, random and kept secret
       JWT_EXPIRATION_DAYS: "365" #Number of days before a clients JWT token will expire
+      JWT_SECRET_KEY: "<JWT_Secret_Key>" This can be anything but make it long, random, and secure.
       BASE_ID: "<AirTable_Base_ID>" #Airtable Base ID (found in the URL)
-      TABLE_NAME: "users" #Airtable name
+      TABLE_NAME: "users" #Airtable table name
       GPIO_PIN: "16" #GPIO PIN
       TOKEN_INTERVAL: "5400" #how long in seconds before pulling in new tokens. (Free version has a limit of 1000 calls a month)
 
