@@ -78,6 +78,7 @@ get_tokens()
 
 # Setup GPIO
 logging.info('Setting up GPIO on pin %s', pin)
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(pin, GPIO.OUT)
 GPIO.output(pin, GPIO.LOW)
