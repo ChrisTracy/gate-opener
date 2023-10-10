@@ -5,7 +5,7 @@ This project comes as a pre-built docker image that enables you to uitilze a rel
 - auth (single line of text)
 - enabled (checkbox)
 
-You will also need to generate a token from the [Airtable Dev Portal](https://airtable.com/create/tokens).
+You will also need to generate a token from the [Airtable Dev Portal](https://airtable.com/create/tokens). Grant read and write scopes to the base.
 
 ## Hardware
 
@@ -73,10 +73,10 @@ services:
     restart: unless-stopped
     privileged: true
     environment:
+      FRIENDLY_NAME: "My garage door" #Name of the device you're controlling
       AT_API_KEY: "<AirTable_Token>" #Airtable token (generate in the airtable dev portal and grant it access to the table)
       JWT_SECRET_KEY: "<JWT_Secret_Key>" #This can be anything but it must be long, random and kept secret
       JWT_EXPIRATION_DAYS: "365" #Number of days before a clients JWT token will expire
-      JWT_SECRET_KEY: "<JWT_Secret_Key>" This can be anything but make it long, random, and secure.
       BASE_ID: "<AirTable_Base_ID>" #Airtable Base ID (found in the URL)
       TABLE_NAME: "users" #Airtable table name
       GPIO_PIN: "16" #GPIO PIN
@@ -117,7 +117,7 @@ These are the api endpoints for the server:
 
 | Method   | URL                                      | Description                                             | Auth | Params |
 | -------- | ---------------------------------------- | --------------------------------------------------------| ---- | ------ |
-| `GET`    | `/api/v1/hello`                          | Sends an authorized reuest to the server to test access.|:heavy_check_mark:|       |
-| `POST`   | `/api/v1/register`                       | Registers a new device/key to the Airtable. Admin approval is required in Airtable after this is completed |      | device      |
+| `GET`    | `/api/v1/hello`                          | Sends an authorized request to the server to test access.|:heavy_check_mark:|       |
+| `POST`   | `/api/v1/register`                       | Registers a new device/key to the Airtable. Admin approval is required in Airtable after this is completed. |      | device      |
 | `POST`   | `/api/v1/trigger`                        | Triggers the relay.                                     |:heavy_check_mark:|        |
 | `POST`   | `/api/v1/refreshtokens`                  | Refreshes the tokens from Airtable.                     |:heavy_check_mark:|        |
