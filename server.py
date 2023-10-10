@@ -30,6 +30,7 @@ def get_tokens():
         Token_Interval = int(os.environ['TOKEN_INTERVAL'])
 
         global api
+        global table
         api = Api(at_api_key)
         table = api.table(base_id=AT_BaseID, table_name=AT_TableName)
 
