@@ -30,6 +30,7 @@ def get_tokens():
         Token_Interval = int(os.environ['TOKEN_INTERVAL'])
 
         global api
+        global table
         api = Api(at_api_key)
         table = api.table(base_id=AT_BaseID, table_name=AT_TableName)
 
@@ -161,7 +162,7 @@ def register():
 
         # Store the token and user/device information in Airtable
         RawData = {"user": device, "auth": f"\"device\":\"{device}\", \"rand\":{num}"}
-        api.table.create(RawData)
+        table.create(RawData)
         logging.info('Registering new device: %s', device)
 
         return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
