@@ -99,13 +99,8 @@ def get_user_by_device(ATcontents, desired_device_name):
         if "auth" in user_data['fields']:
             auth_val = user_data['fields']['auth']
             try:
-                auth_data = json.loads("{" + auth_val + "}")
-                
-                logging.info(f"authData1: {auth_data}")
+                auth_data = json.loads(auth_val)
                 dev = auth_data.get('device')
-                logging.info(f"devName: {dev}")
-                logging.info(f"des_devName: {desired_device_name}")
-                
                 if auth_data.get('device') == desired_device_name:
                     user_name = user_data['fields'].get('user')
                     if user_name:
@@ -120,7 +115,7 @@ def get_admin_by_device(ATcontents, desired_device_name):
         if "auth" in user_data['fields']:
             auth_val = user_data['fields']['auth']
             try:
-                auth_data = json.loads("{" + auth_val + "}")
+                auth_data = json.loads(auth_val)
                 if auth_data.get('device') == desired_device_name:
                     admin = user_data['fields'].get('admin')
                     if admin:
@@ -151,14 +146,12 @@ def verify_token(token):
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         device_str = payload.get('device')
-        logging.info(device_str)
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
             global current_user_name
             global isAdmin
             current_user_name = get_user_by_device(ATcontents, device_str)
             isAdmin = get_admin_by_device(ATcontents, device_str)
-            logging.info(current_user_name)
             logging.info("Token found! Auth Successful for %s", current_user_name)
             return True
     except jwt.ExpiredSignatureError:
@@ -188,7 +181,7 @@ def register():
         token = jwt.encode({'device': device, 'rand': random_16_char_string}, jwt_secret_key, algorithm='HS256')
 
         # Store the token and user/device information in Airtable
-        RawData = {"user": device, "auth": f"\"device\":\"{device}\", \"rand\":{random_16_char_string}", "invite": invite_string}
+        RawData = {"user": device, "auth": f"\{\"device\":\"{device}\", \"rand\":\"{random_16_char_string}\"\}", "invite": invite_string}
         table.create(RawData)
         logging.info('Registering new device: %s', device)
 
