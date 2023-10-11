@@ -222,10 +222,11 @@ def enable():
             logging.info("Attempting to Enable user with invite %s", invite)
             user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
             tableItemID = user['id']
-            if tableItemID:
+            enabled = user['enabled']
+            if tableItemID and enabled == False:
                 table.update(tableItemID, {"enabled": True})
-                return f"User was enabled. Invite: {invite}"
                 logging.info("User enabled with invite: %s", invite)
+                return f"User was enabled. Invite: {invite}"
         except Exception as e: 
             logging.error(f"Not able to enable device. Invite: {invite}. Error: {e}")
             return f"Not able to enable device. Invite: {invite_str}"
