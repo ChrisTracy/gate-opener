@@ -223,6 +223,7 @@ def enable():
             user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
             tableItemID = user['id']
             enabled = user['enabled']
+            logging.info(enabled)
             if tableItemID:
                 if enabled == False:
                     table.update(tableItemID, {"enabled": True})
