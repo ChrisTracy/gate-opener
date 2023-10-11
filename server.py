@@ -37,6 +37,7 @@ def get_tokens(thread=False):
 
         global ATcontents
         ATcontents = table.all()
+        logging.info(f"ATcont: {ATcontents}")
 
         global auths
         auths = []
