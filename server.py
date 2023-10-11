@@ -57,6 +57,8 @@ def get_tokens(thread=False):
         
         if thread == True:
             threading.Timer(Token_Interval, get_tokens).start()
+        else:
+            return ('Token refresh copleted by %s', current_user_name)
 
     except Exception as e:
         logging.exception("Could not reach Airtable: %s", str(e))
