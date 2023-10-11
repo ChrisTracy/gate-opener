@@ -214,6 +214,25 @@ def refresh_tokens():
         logging.info("%s does not have admin permissions to call refresh token route.", current_user_name)
         return f"Access denied. You do not have access to this route!"
 
+@app.route('/api/v1/enable', methods=['GET'])
+def enable():
+    invite = request.args.get('invite')
+    if invite:
+        try:
+            logging.info("Attempting to Enable user with invite %s", invite)
+            user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
+            tableItemID = user['id']
+            if tableItemID:
+                table.update(tableItemID, {"enabled": True})
+                return f"User was enabled. Invite: {invite}"
+                logging.info("User enabled with invite: %s", invite)
+        except Exception as e: 
+            logging.error(f"Not able to enable device. Invite: {invite}. Error: {e}")
+            return f"Not able to enable device. Invite: {invite_str}"
+    else:
+        logging.info("Invite not found in the URL")
+        return 'Invite not found in the URL'
+
 # Start server
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5151)
