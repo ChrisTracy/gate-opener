@@ -219,6 +219,7 @@ def enable():
     invite = request.args.get('invite')
     if invite:
         try:
+            get_tokens()
             logging.info("Attempting to Enable user with invite %s", invite)
             user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
             tableItemID = user['id']
