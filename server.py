@@ -22,7 +22,7 @@ jwt_secret_key = os.environ['JWT_SECRET_KEY']
 JWT_EXPIRATION_DAYS = int(os.environ.get('JWT_EXPIRATION_DAYS', 365))
 
 # Function to pull tokens
-def get_tokens(thread):
+def get_tokens(thread=False):
     try:
         logging.info('Getting tokens from AirTable')
         at_api_key = os.environ['AT_API_KEY']
@@ -192,7 +192,7 @@ def trigger():
 def refresh_tokens():
     if isAdmin == True:
         logging.info('Token refresh requested by %s', current_user_name)
-        get_tokens(thread=False)
+        get_tokens()
     else:
         logging.info('%s does not have admin permissions to call refresh token route.', current_user_name)
         return f"Access denied. You do not have access to this route!"
