@@ -58,7 +58,7 @@ def get_tokens(thread=False):
         if thread == True:
             threading.Timer(Token_Interval, get_tokens).start()
         else:
-            return ('Token refresh copleted by %s', current_user_name)
+            return ('Token refresh completed by %s', current_user_name)
 
     except Exception as e:
         logging.exception("Could not reach Airtable: %s", str(e))
@@ -194,7 +194,12 @@ def trigger():
 def refresh_tokens():
     if isAdmin == True:
         logging.info('Token refresh requested by %s', current_user_name)
-        get_tokens()
+        try:
+            get_tokens()
+            return ('Token refresh completed by %s', current_user_name)
+        except:
+            logging.info('Token refresh could not be completed by %s', current_user_name)
+            return ('Token refresh could not be completed by %s. Review the logs.', current_user_name)
     else:
         logging.info('%s does not have admin permissions to call refresh token route.', current_user_name)
         return f"Access denied. You do not have access to this route!"
