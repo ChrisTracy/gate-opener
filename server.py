@@ -239,7 +239,7 @@ def enable():
                 return f"Could not find table item for invite: {invite}"
         except Exception as e: 
             logging.error(f"Not able to enable device. Invite: {invite}. Error: {e}")
-            return f"Not able to enable device. Invite: {invite}"
+            return f"Invite code not found. Ensure ivite code is correct. Invite: {invite}"
     else:
         logging.info("Invite not found in the URL")
         return 'Invite not found in the URL'
