@@ -224,7 +224,6 @@ def enable():
             logging.info("Attempting to Enable user with invite %s", invite)
             user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
             tableItemID = user['id']
-            enabled = None
             enabled = user['fields'].get('enabled')
             logging.info(enabled)
             if tableItemID:
