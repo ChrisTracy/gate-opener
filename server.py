@@ -166,10 +166,11 @@ def register():
         # Create a JWT token with user/device information
         expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=JWT_EXPIRATION_DAYS)
         random_16_char_string = generate_random_string(16)
+        invite_string = generate_random_string(16)
         token = jwt.encode({'device': device, 'rand': random_16_char_string}, jwt_secret_key, algorithm='HS256')
 
         # Store the token and user/device information in Airtable
-        RawData = {"user": device, "auth": f"\"device\":\"{device}\", \"rand\":{random_16_char_string}"}
+        RawData = {"user": device, "auth": f"\"device\":\"{device}\", \"rand\":{random_16_char_string}", "invite": invite_string}
         table.create(RawData)
         logging.info('Registering new device: %s', device)
 
