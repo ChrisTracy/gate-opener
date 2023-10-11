@@ -128,7 +128,7 @@ def get_user_by_invite(ATcontents, invite_str):
     for user_data in ATcontents:
         if "invite" in user_data['fields']:
             invite_val = user_data['fields']['invite']
-            if invite_val:
+            if invite_val == invite_str:
                 return user_data
     return None
 
