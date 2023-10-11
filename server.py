@@ -97,6 +97,7 @@ def get_user_by_device(ATcontents, desired_device_name):
     for user_data in ATcontents:
         if "auth" in user_data['fields']:
             auth_val = user_data['fields']['auth']
+            logging.info(auth_val)
             try:
                 auth_data = json.loads("{" + auth_val + "}")
                 if auth_data.get('device') == desired_device_name:
