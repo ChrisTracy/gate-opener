@@ -78,8 +78,8 @@ logging.basicConfig(
     ]
 )
 
-# Run get tokens
-get_tokens(thread=True)
+# Run get tokens on the specified interval
+threading.Thread(target=get_tokens, args=(True,)).start()
 
 # Setup GPIO
 logging.info('Setting up GPIO on pin %s', pin)
