@@ -181,7 +181,7 @@ def register():
         token = jwt.encode({'device': device, 'rand': random_16_char_string}, jwt_secret_key, algorithm='HS256')
 
         # Store the token and user/device information in Airtable
-        RawData = {"user": device, "auth": f"\{\"device\":\"{device}\", \"rand\":\"{random_16_char_string}\"\}", "invite": invite_string}
+        RawData = {"user": device, "auth": f'{{"device":"{device}", "rand":"{random_16_char_string}"}}', "invite": invite_string}
         table.create(RawData)
         logging.info('Registering new device: %s', device)
 
