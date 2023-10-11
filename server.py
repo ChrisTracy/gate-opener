@@ -193,15 +193,15 @@ def trigger():
 @auth.login_required
 def refresh_tokens():
     if isAdmin == True:
-        logging.info('Token refresh requested by %s', current_user_name)
+        logging.info("Token refresh requested by %s", current_user_name)
         try:
             get_tokens()
-            return ('Token refresh completed by %s', current_user_name)
+            return ("Token refresh completed by %s", current_user_name)
         except:
-            logging.info('Token refresh could not be completed by %s', current_user_name)
-            return ('Token refresh could not be completed by %s. Review the logs.', current_user_name)
+            logging.info("Token refresh could not be completed by %s", current_user_name)
+            return ("Token refresh could not be completed by %s. Review the logs.", current_user_name)
     else:
-        logging.info('%s does not have admin permissions to call refresh token route.', current_user_name)
+        logging.info("%s does not have admin permissions to call refresh token route.", current_user_name)
         return f"Access denied. You do not have access to this route!"
 
 # Start server
