@@ -176,7 +176,6 @@ def register():
 
 # Trigger route
 @app.route('/api/v1/trigger', methods=["POST"])
-@app.route('/gate/front/', methods=["POST"])  # Legacy route (will be deprecated)
 @auth.login_required
 def trigger():
     GPIO.output(pin, GPIO.HIGH)
