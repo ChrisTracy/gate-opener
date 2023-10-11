@@ -58,7 +58,7 @@ def get_tokens(thread=False):
         if thread == True:
             threading.Timer(Token_Interval, get_tokens).start()
         else:
-            return ('Token refresh completed by %s', current_user_name)
+            return ('Token refresh completed')
 
     except Exception as e:
         logging.exception("Could not reach Airtable: %s", str(e))
@@ -228,6 +228,7 @@ def enable():
                 if enabled != True:
                     table.update(tableItemID, {"enabled": True})
                     logging.info("User enabled with invite: %s", invite)
+                    get_tokens()
                     return f"User was enabled. Invite: {invite}"
                 else:
                     return f"No action taken. User is already enabled. Invite: {invite}"
