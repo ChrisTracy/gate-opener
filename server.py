@@ -10,6 +10,7 @@ from waitress import serve
 from pyairtable import Api
 import RPi.GPIO as GPIO
 import random
+import string
 import jwt
 
 # Set GPIO pin and friendly name
@@ -118,6 +119,10 @@ def get_admin_by_device(ATcontents, desired_device_name):
                 pass
     return None
 
+def generate_random_string(length):
+    characters = string.ascii_letters + string.digits
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
 
 # Verify token using JWT
 @auth.verify_token
@@ -157,11 +162,11 @@ def register():
     if device is not None:
         # Create a JWT token with user/device information
         expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=JWT_EXPIRATION_DAYS)
-        num = random.random()
-        token = jwt.encode({'device': device, 'rand': num}, jwt_secret_key, algorithm='HS256')
+        random_16_char_string = generate_random_string(16)
+        token = jwt.encode({'device': device, 'rand': random_16_char_string}, jwt_secret_key, algorithm='HS256')
 
         # Store the token and user/device information in Airtable
-        RawData = {"user": device, "auth": f"\"device\":\"{device}\", \"rand\":{num}"}
+        RawData = {"user": device, "auth": f"\"device\":\"{device}\", \"rand\":{random_16_char_string}"}
         table.create(RawData)
         logging.info('Registering new device: %s', device)
 
@@ -171,7 +176,6 @@ def register():
 
 # Trigger route
 @app.route('/api/v1/trigger', methods=["POST"])
-@app.route('/gate/front/', methods=["POST"])  # Legacy route (will be deprecated)
 @auth.login_required
 def trigger():
     GPIO.output(pin, GPIO.HIGH)
