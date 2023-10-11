@@ -97,7 +97,6 @@ def get_user_by_device(ATcontents, desired_device_name):
     for user_data in ATcontents:
         if "auth" in user_data['fields']:
             auth_val = user_data['fields']['auth']
-            logging.info(auth_val)
             try:
                 auth_data = json.loads("{" + auth_val + "}")
                 if auth_data.get('device') == desired_device_name:
@@ -145,12 +144,14 @@ def verify_token(token):
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         device_str = payload.get('device')
+        logging.info(device_str)
         is_rand_in_auth = any(rand_value_str in element for element in auths)
         if is_rand_in_auth:
             global current_user_name
             global isAdmin
             current_user_name = get_user_by_device(ATcontents, device_str)
-            isAdmin = get_admin_by_device(ATcontents, device_str) 
+            isAdmin = get_admin_by_device(ATcontents, device_str)
+            logging.info(current_user_name)
             logging.info("Token found! Auth Successful for %s", current_user_name)
             return True
     except jwt.ExpiredSignatureError:
