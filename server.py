@@ -223,10 +223,15 @@ def enable():
             user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
             tableItemID = user['id']
             enabled = user['enabled']
-            if tableItemID and enabled == False:
-                table.update(tableItemID, {"enabled": True})
-                logging.info("User enabled with invite: %s", invite)
-                return f"User was enabled. Invite: {invite}"
+            if tableItemID:
+                if enabled == False:
+                    table.update(tableItemID, {"enabled": True})
+                    logging.info("User enabled with invite: %s", invite)
+                    return f"User was enabled. Invite: {invite}"
+                else:
+                    return f"No action taken. User is already enabled. Invite: {invite}"
+            else:
+                return f"Could not find table item for invite: {invite}"
         except Exception as e: 
             logging.error(f"Not able to enable device. Invite: {invite}. Error: {e}")
             return f"Not able to enable device. Invite: {invite_str}"
