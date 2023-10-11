@@ -122,6 +122,15 @@ def get_admin_by_device(ATcontents, desired_device_name):
                 pass
     return None
 
+# Helper function to get user by their invite ID
+def get_user_by_invite(ATcontents, invite_str):
+    for user_data in ATcontents:
+        if "invite" in user_data['fields']:
+            invite_val = user_data['fields']['invite']
+            if invite_val:
+                return user_data
+    return None
+
 def generate_random_string(length):
     characters = string.ascii_letters + string.digits
     random_string = ''.join(random.choice(characters) for _ in range(length))
