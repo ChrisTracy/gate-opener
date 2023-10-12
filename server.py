@@ -22,7 +22,7 @@ jwt_secret_key = os.environ['JWT_SECRET_KEY']
 JWT_EXPIRATION_DAYS = int(os.environ.get('JWT_EXPIRATION_DAYS', 365))
 
 # Function to pull tokens
-def get_tokens():
+def get_tokens(thread=False):
     try:
         logging.info('Getting tokens from AirTable')
         at_api_key = os.environ['AT_API_KEY']
@@ -54,8 +54,11 @@ def get_tokens():
                     authVal = ATcontent['fields']['auth']
                     user_auth_dict[userVal] = authVal
                     auths.append(authVal)
-
-        threading.Timer(Token_Interval, get_tokens).start()
+        
+        if thread == True:
+            threading.Timer(Token_Interval, get_tokens, args=(True,)).start()
+        else:
+            return ('Token refresh completed')
 
     except Exception as e:
         logging.exception("Could not reach Airtable: %s", str(e))
@@ -75,8 +78,8 @@ logging.basicConfig(
     ]
 )
 
-# Run get tokens
-get_tokens()
+# Run get tokens on the specified interval
+threading.Thread(target=get_tokens, args=(True,)).start()
 
 # Setup GPIO
 logging.info('Setting up GPIO on pin %s', pin)
@@ -95,7 +98,8 @@ def get_user_by_device(ATcontents, desired_device_name):
         if "auth" in user_data['fields']:
             auth_val = user_data['fields']['auth']
             try:
-                auth_data = json.loads("{" + auth_val + "}")
+                auth_data = json.loads(auth_val)
+                dev = auth_data.get('device')
                 if auth_data.get('device') == desired_device_name:
                     user_name = user_data['fields'].get('user')
                     if user_name:
@@ -110,13 +114,22 @@ def get_admin_by_device(ATcontents, desired_device_name):
         if "auth" in user_data['fields']:
             auth_val = user_data['fields']['auth']
             try:
-                auth_data = json.loads("{" + auth_val + "}")
+                auth_data = json.loads(auth_val)
                 if auth_data.get('device') == desired_device_name:
                     admin = user_data['fields'].get('admin')
                     if admin:
                         return admin
             except json.JSONDecodeError:
                 pass
+    return None
+
+# Helper function to get user by their invite ID
+def get_user_by_invite(ATcontents, invite_str):
+    for user_data in ATcontents:
+        if "invite" in user_data['fields']:
+            invite_val = user_data['fields']['invite']
+            if invite_val == invite_str:
+                return user_data
     return None
 
 def generate_random_string(length):
@@ -163,10 +176,11 @@ def register():
         # Create a JWT token with user/device information
         expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=JWT_EXPIRATION_DAYS)
         random_16_char_string = generate_random_string(16)
+        invite_string = generate_random_string(30)
         token = jwt.encode({'device': device, 'rand': random_16_char_string}, jwt_secret_key, algorithm='HS256')
 
         # Store the token and user/device information in Airtable
-        RawData = {"user": device, "auth": f"\"device\":\"{device}\", \"rand\":{random_16_char_string}"}
+        RawData = {"user": device, "auth": f'{{"device":"{device}", "rand":"{random_16_char_string}"}}', "invite": invite_string}
         table.create(RawData)
         logging.info('Registering new device: %s', device)
 
@@ -190,41 +204,44 @@ def trigger():
 @auth.login_required
 def refresh_tokens():
     if isAdmin == True:
+        logging.info("Token refresh requested by %s", current_user_name)
         try:
-            logging.info('Token refresh requested by %s', current_user_name)
-            at_api_key = os.environ['AT_API_KEY']
-            AT_BaseID = os.environ['BASE_ID']
-            AT_TableName = os.environ['TABLE_NAME']
-            Token_Interval = int(os.environ['TOKEN_INTERVAL'])
-    
-            global api
-            api = Api(at_api_key)
-            table = api.table(base_id=AT_BaseID, table_name=AT_TableName)
-    
-            global ATcontents
-            ATcontents = table.all()
-    
-            global auths
-            auths = []
-    
-            global user_auth_dict
-            user_auth_dict = {}
-    
-            if ATcontents is not None:
-                for ATcontent in ATcontents:
-                    if "enabled" in ATcontent['fields']:
-                        userVal = ATcontent['fields']['user']
-                        authVal = ATcontent['fields']['auth']
-                        user_auth_dict[userVal] = authVal
-                        auths.append(authVal)
-            logging.info('Tokens were manually refreshed by %s', current_user_name)
-            return f"Tokens were manually refreshed by {current_user_name}"
-    
-        except Exception as e:
-            logging.exception("Could not reach Airtable: %s", str(e))
+            get_tokens()
+            return ("Token refresh completed")
+        except:
+            logging.info("Token refresh could not be completed")
+            return ("Token refresh could not be completed. Review the logs.")
     else:
-        logging.info('%s does not have admin permissions to call refresh token route.', current_user_name)
+        logging.info("%s does not have admin permissions to call refresh token route.", current_user_name)
         return f"Access denied. You do not have access to this route!"
+
+@app.route('/api/v1/enable', methods=['GET'])
+def enable():
+    invite = request.args.get('invite')
+    if invite:
+        try:
+            get_tokens()
+            logging.info("Attempting to Enable user with invite %s", invite)
+            user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
+            tableItemID = user['id']
+            enabled = user['fields'].get('enabled')
+            logging.info(enabled)
+            if tableItemID:
+                if enabled != True:
+                    table.update(tableItemID, {"enabled": True})
+                    logging.info("User enabled with invite: %s", invite)
+                    get_tokens()
+                    return f"User was enabled. Invite: {invite}"
+                else:
+                    return f"No action taken. User is already enabled. Invite: {invite}"
+            else:
+                return f"Could not find table item for invite: {invite}"
+        except Exception as e: 
+            logging.error(f"Not able to enable device. Invite: {invite}. Error: {e}")
+            return f"Invite code not found. Ensure ivite code is correct. Invite: {invite}"
+    else:
+        logging.info("Invite not found in the URL")
+        return 'Invite not found in the URL'
 
 # Start server
 if __name__ == "__main__":
