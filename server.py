@@ -56,7 +56,7 @@ def get_tokens(thread=False):
                     auths.append(authVal)
         
         if thread == True:
-            threading.Timer(Token_Interval, get_tokens).start()
+            threading.Timer(Token_Interval, get_tokens, args=(True,)).start()
         else:
             return ('Token refresh completed')
 
