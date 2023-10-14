@@ -188,7 +188,7 @@ def index():
 @app.route('/api/v1/register', methods=["POST"])
 def register():
     device = request.args.get('device')
-    if psk != 1
+    if psk != 1:
         psk = request.args.get('psk')
     
     if psk == register_user_psk:
@@ -257,9 +257,9 @@ def refresh_tokens():
 @app.route('/api/v1/user/enable', methods=['GET'])
 def enable():
     invite = request.args.get('invite')
-    if psk != 1
+    if psk != 1:
         psk = request.args.get('psk')
-        
+
     if psk == enable_user_psk: 
         if invite:
             try:
