@@ -101,8 +101,8 @@ services:
       BASE_ID: "<AirTable_Base_ID>" #Airtable Base ID (found in the URL)
       TABLE_NAME: "users" #Airtable table name
       GPIO_PIN: "16" #GPIO PIN
-      REGISTER_PSK: "<random key>" #Create a random pre-shared key that you will share when clients register. THIS IS NOT SECURE UNLESS YOU ARE BEHIND A PROXY
-      ENABLE_PSK: "<random key>" #Create a random pre-shared key that you will use to enable users. THIS IS NOT SECURE UNLESS YOU ARE BEHIND A PROXY
+      REGISTER_PSK: "<random key>" #Create a random pre-shared key that you will share when clients register. THIS IS NOT SECURE UNLESS YOU ARE BEHIND A PROXY WITH A VALID CERT
+      ENABLE_PSK: "<random key>" #Create a random pre-shared key that you will use to enable users. THIS IS NOT SECURE UNLESS YOU ARE BEHIND A PROXY WITH A VALID CERT
       TOKEN_INTERVAL: "5400" #how long in seconds before pulling in new tokens. (Free version has a limit of 1000 calls a month)
 
       #these are only required if you want to receive approval emails for new devices
@@ -153,7 +153,7 @@ These are the api endpoints for the server:
 | Method   | URL                                      | Description                                             | Auth | Params |
 | -------- | ---------------------------------------- | --------------------------------------------------------| ---- | ------ |
 | `GET`    | `/api/v1/hello`                          | Sends an authorized request to the server to test access |:heavy_check_mark:|       |
-| `POST`   | `/api/v1/register`                       | Registers a new device/key to the Airtable. Admin approval is required in Airtable after this is completed  |      | device      |
+| `POST`   | `/api/v1/register`                       | Registers a new device/key to the Airtable. Admin approval is required in Airtable after this is completed  |      | device, psk      |
 | `POST`   | `/api/v1/trigger`                        | Triggers the relay                                      |:heavy_check_mark: |        |
 | `POST`   | `/api/v1/refreshtokens`                  | Refreshes the tokens from Airtable                      |:heavy_check_mark: |        |
-| `GET`   | `/api/v1/user/enable`                     | Enables users using the invite token                    |                   | invite |
+| `GET`   | `/api/v1/user/enable`                     | Enables users using the invite token                    |                   | invite, psk |
