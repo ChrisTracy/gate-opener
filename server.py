@@ -255,7 +255,7 @@ def refresh_tokens():
 def enable():
     invite = request.args.get('invite')
     psk = request.args.get('psk')
-   if psk == enable_user_psk: 
+    if psk == enable_user_psk: 
         if invite:
             try:
                 get_tokens()
