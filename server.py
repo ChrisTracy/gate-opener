@@ -4,22 +4,33 @@ import datetime
 import time
 import logging
 import json
+import random
+import string
+import jwt
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPTokenAuth
 from waitress import serve
 from pyairtable import Api
 import RPi.GPIO as GPIO
-import random
-import string
-import jwt
+from modules.send_html_email import send_dynamic_email
 
 # Set GPIO pin and friendly name
+proxy_url = os.environ['PROXY_URL']
 friendly_name = os.environ['FRIENDLY_NAME']
 pin = int(os.environ['GPIO_PIN'])
 
 # Set JWT secret key (keep this secret) and client token expiration
 jwt_secret_key = os.environ['JWT_SECRET_KEY']
 JWT_EXPIRATION_DAYS = int(os.environ.get('JWT_EXPIRATION_DAYS', 365))
+
+# Email configuration
+sender_email = os.environ['SENDER_EMAIL']
+receiver_email = os.environ['RECEIVER_EMAIL']
+smtp_server = (os.environ.get('SMTP_SERVER', "smtp.gmail.com"))
+smtp_port = int(os.environ.get('SMTP_PORT', 587))
+smtp_username = (os.environ.get('SMTP_USERNAME', sender_email))
+smtp_password = os.environ['SMTP_PASSWORD']
+html_file_path = (os.environ.get('HTML_FILE_PATH', "/html/new-user-email.html"))  # Path to the HTML file
 
 # Function to pull tokens
 def get_tokens(thread=False):
@@ -183,6 +194,21 @@ def register():
         RawData = {"user": device, "auth": f'{{"device":"{device}", "rand":"{random_16_char_string}"}}', "invite": invite_string}
         table.create(RawData)
         logging.info('Registering new device: %s', device)
+
+        #send email
+        if sender_email:
+            # Define a dictionary of variables and their values
+            variables = {
+                'friendly_name': friendly_name,
+                'device_name': device,
+                'host': proxy_url,
+                'invite': invite_string,
+            }
+            
+            subject = f"New Device Request for {friendly_name}"
+            
+            # Call the send_dynamic_email function
+            send_dynamic_email(sender_email, receiver_email, smtp_server, smtp_port, smtp_username, smtp_password, subject, html_file_path, variables)
 
         return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
     else:
