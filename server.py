@@ -202,7 +202,7 @@ def register():
                 'friendly_name': friendly_name,
                 'device_name': device,
                 'host': proxy_url,
-                'invite': invite_string,
+                'invite_str': invite_string,
             }
             
             subject = f"New Device Request for {friendly_name}"
