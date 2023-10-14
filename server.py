@@ -280,7 +280,7 @@ def enable():
         else:
             logging.info("Invite not found in the URL")
             return 'Invite not found in the URL'
-   else:
+    else:
        logging.exception('PSK did not match on enable route. Provided PSK: %s', psk)
        return jsonify({"message": "Invalid PSK. Access denied."}), 401
 
