@@ -32,6 +32,10 @@ smtp_username = (os.environ.get('SMTP_USERNAME', sender_email))
 smtp_password = (os.environ.get('SMTP_PASSWORD', None))
 html_file_path = (os.environ.get('HTML_FILE_PATH', "html/new-user-email.html"))  # Path to the HTML file
 
+#setup psk's
+register_user_psk = os.environ['REGISTER_PSK']
+enable_user_psk = os.environ['ENABLE_PSK']
+
 # Function to pull tokens
 def get_tokens(thread=False):
     try:
@@ -182,37 +186,43 @@ def index():
 @app.route('/api/v1/register', methods=["POST"])
 def register():
     device = request.args.get('device')
-
-    if device is not None:
-        # Create a JWT token with user/device information
-        expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=JWT_EXPIRATION_DAYS)
-        random_16_char_string = generate_random_string(16)
-        invite_string = generate_random_string(30)
-        token = jwt.encode({'device': device, 'rand': random_16_char_string}, jwt_secret_key, algorithm='HS256')
-
-        # Store the token and user/device information in Airtable
-        RawData = {"user": device, "auth": f'{{"device":"{device}", "rand":"{random_16_char_string}"}}', "invite": invite_string}
-        table.create(RawData)
-        logging.info('Registering new device: %s', device)
-
-        #send email
-        if sender_email and receiver_emai and smtp_password and proxy_url:
-            # Define a dictionary of variables and their values
-            variables = {
-                'friendly_name': friendly_name,
-                'device_name': device,
-                'host': proxy_url,
-                'invite_str': invite_string,
-            }
-            
-            subject = f"New Device Request for {friendly_name}"
-            
-            # Call the send_dynamic_email function
-            send_dynamic_email(sender_email, receiver_email, smtp_server, smtp_port, smtp_username, smtp_password, subject, html_file_path, variables)
-
-        return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
+    psk = request.args.get('psk')
+    
+    if psk == register_user_psk:
+        if device is not None:
+            # Create a JWT token with user/device information
+            expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=JWT_EXPIRATION_DAYS)
+            random_16_char_string = generate_random_string(16)
+            invite_string = generate_random_string(30)
+            token = jwt.encode({'device': device, 'rand': random_16_char_string}, jwt_secret_key, algorithm='HS256')
+    
+            # Store the token and user/device information in Airtable
+            RawData = {"user": device, "auth": f'{{"device":"{device}", "rand":"{random_16_char_string}"}}', "invite": invite_string}
+            table.create(RawData)
+            logging.info('Registering new device: %s', device)
+    
+            #send email
+            if sender_email and receiver_email and smtp_password and proxy_url:
+                # Define a dictionary of variables and their values
+                variables = {
+                    'friendly_name': friendly_name,
+                    'device_name': device,
+                    'host': proxy_url,
+                    'invite_str': invite_string,
+                    'psk': enable_user_psk,
+                }
+                
+                subject = f"New Device Request for {friendly_name}"
+                
+                # Call the send_dynamic_email function
+                send_dynamic_email(sender_email, receiver_email, smtp_server, smtp_port, smtp_username, smtp_password, subject, html_file_path, variables)
+    
+            return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
+        else:
+            return jsonify({"message": "Missing the device parameter"})
     else:
-        return jsonify({"message": "Missing the device parameter"})
+        logging.exception('PSK did not match on register route. Provided PSK: %s', psk)
+        return jsonify({"message": "Invalid PSK. Access denied."}), 401
 
 # Trigger route
 @app.route('/api/v1/trigger', methods=["POST"])
@@ -244,30 +254,36 @@ def refresh_tokens():
 @app.route('/api/v1/user/enable', methods=['GET'])
 def enable():
     invite = request.args.get('invite')
-    if invite:
-        try:
-            get_tokens()
-            logging.info("Attempting to Enable user with invite %s", invite)
-            user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
-            tableItemID = user['id']
-            enabled = user['fields'].get('enabled')
-            logging.info(enabled)
-            if tableItemID:
-                if enabled != True:
-                    table.update(tableItemID, {"enabled": True})
-                    logging.info("User enabled with invite: %s", invite)
-                    get_tokens()
-                    return f"User was enabled. Invite: {invite}"
+    psk = request.args.get('psk')
+
+    if psk == enable_user_psk: 
+        if invite:
+            try:
+                get_tokens()
+                logging.info("Attempting to Enable user with invite %s", invite)
+                user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
+                tableItemID = user['id']
+                enabled = user['fields'].get('enabled')
+                logging.info(enabled)
+                if tableItemID:
+                    if enabled != True:
+                        table.update(tableItemID, {"enabled": True})
+                        logging.info("User enabled with invite: %s", invite)
+                        get_tokens()
+                        return f"User was enabled. Invite: {invite}"
+                    else:
+                        return f"No action taken. User is already enabled. Invite: {invite}"
                 else:
-                    return f"No action taken. User is already enabled. Invite: {invite}"
-            else:
-                return f"Could not find table item for invite: {invite}"
-        except Exception as e: 
-            logging.error(f"Not able to enable device. Invite: {invite}. Error: {e}")
-            return f"Invite code not found. Ensure ivite code is correct. Invite: {invite}"
+                    return f"Could not find table item for invite: {invite}"
+            except Exception as e: 
+                logging.error(f"Not able to enable device. Invite: {invite}. Error: {e}")
+                return f"Invite code not found. Ensure ivite code is correct. Invite: {invite}"
+        else:
+            logging.info("Invite not found in the URL")
+            return 'Invite not found in the URL'
     else:
-        logging.info("Invite not found in the URL")
-        return 'Invite not found in the URL'
+       logging.exception('PSK did not match on enable route. Provided PSK: %s', psk)
+       return jsonify({"message": "Invalid PSK. Access denied."}), 401
 
 # Start server
 if __name__ == "__main__":
