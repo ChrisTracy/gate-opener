@@ -101,6 +101,8 @@ services:
       BASE_ID: "<AirTable_Base_ID>" #Airtable Base ID (found in the URL)
       TABLE_NAME: "users" #Airtable table name
       GPIO_PIN: "16" #GPIO PIN
+      REGISTER_PSK: "<random key>" #Create a random pre-shared key that you will share when clients register. THIS IS NOT SECURE UNLESS YOU ARE BEHIND A PROXY
+      ENABLE_PSK: "<random key>" #Create a random pre-shared key that you will use to enable users. THIS IS NOT SECURE UNLESS YOU ARE BEHIND A PROXY
       TOKEN_INTERVAL: "5400" #how long in seconds before pulling in new tokens. (Free version has a limit of 1000 calls a month)
 
       #these are only required if you want to receive approval emails for new devices
