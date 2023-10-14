@@ -196,7 +196,7 @@ def register():
         logging.info('Registering new device: %s', device)
 
         #send email
-        if sender_email:
+        if sender_email and receiver_emai and smtp_password and proxy_url:
             # Define a dictionary of variables and their values
             variables = {
                 'friendly_name': friendly_name,
