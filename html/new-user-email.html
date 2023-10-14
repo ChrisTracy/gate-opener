@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Email Template</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #5840aa;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            background-color: #0c131d;
+            color: #fff;
+        }
+
+        .header {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+            font-size: 30px;
+            line-height: 36px;
+            margin: 0;
+        }
+
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .content p {
+            font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+            font-size: 16px;
+            line-height: 150%;
+        }
+
+        .button {
+            text-align: center;
+        }
+
+        .button a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #0099cc;
+            color: #fff;
+            text-decoration: none;
+            font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Device Request</h1>
+        </div>
+        <div class="content">
+            <p>A new device is requesting access to {friendly_name}.</p>
+            <p>Device: {device_name}</p>
+            <p>Click the button below to approve the request.</p>
+        </div>
+        <div class="button">
+            <a href="{host}/api/v1/user/enable?invite={invite_str}">Approve</a>
+        </div>
+    </div>
+</body>
+</html>

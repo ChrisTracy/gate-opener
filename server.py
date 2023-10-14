@@ -4,14 +4,15 @@ import datetime
 import time
 import logging
 import json
+import random
+import string
+import jwt
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPTokenAuth
 from waitress import serve
 from pyairtable import Api
 import RPi.GPIO as GPIO
-import random
-import string
-import jwt
+from modules.send_html_email import send_dynamic_email
 
 # Set GPIO pin and friendly name
 friendly_name = os.environ['FRIENDLY_NAME']
@@ -20,6 +21,16 @@ pin = int(os.environ['GPIO_PIN'])
 # Set JWT secret key (keep this secret) and client token expiration
 jwt_secret_key = os.environ['JWT_SECRET_KEY']
 JWT_EXPIRATION_DAYS = int(os.environ.get('JWT_EXPIRATION_DAYS', 365))
+
+# Email configuration
+proxy_url = (os.environ.get('PROXY_URL', None))
+sender_email = (os.environ.get('SENDER_EMAIL', None))
+receiver_email = (os.environ.get('RECEIVER_EMAIL', None))
+smtp_server = (os.environ.get('SMTP_SERVER', "smtp.gmail.com"))
+smtp_port = int(os.environ.get('SMTP_PORT', 587))
+smtp_username = (os.environ.get('SMTP_USERNAME', sender_email))
+smtp_password = (os.environ.get('SMTP_PASSWORD', None))
+html_file_path = (os.environ.get('HTML_FILE_PATH', "html/new-user-email.html"))  # Path to the HTML file
 
 # Function to pull tokens
 def get_tokens(thread=False):
@@ -184,6 +195,21 @@ def register():
         table.create(RawData)
         logging.info('Registering new device: %s', device)
 
+        #send email
+        if sender_email and receiver_emai and smtp_password and proxy_url:
+            # Define a dictionary of variables and their values
+            variables = {
+                'friendly_name': friendly_name,
+                'device_name': device,
+                'host': proxy_url,
+                'invite_str': invite_string,
+            }
+            
+            subject = f"New Device Request for {friendly_name}"
+            
+            # Call the send_dynamic_email function
+            send_dynamic_email(sender_email, receiver_email, smtp_server, smtp_port, smtp_username, smtp_password, subject, html_file_path, variables)
+
         return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
     else:
         return jsonify({"message": "Missing the device parameter"})
@@ -215,7 +241,7 @@ def refresh_tokens():
         logging.info("%s does not have admin permissions to call refresh token route.", current_user_name)
         return f"Access denied. You do not have access to this route!"
 
-@app.route('/api/v1/enable', methods=['GET'])
+@app.route('/api/v1/user/enable', methods=['GET'])
 def enable():
     invite = request.args.get('invite')
     if invite:

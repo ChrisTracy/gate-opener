@@ -1,10 +1,11 @@
 # Raspberry Pi Gate Opener
 
-This project comes as a pre-built docker image that enables you to uitilze a relay and raspberry pi to open a gate or garage door via API call. You will need to create a table in [AirTable](https://airtable.com/) with 4 fields:
+This project comes as a pre-built docker image that enables you to uitilze a relay and raspberry pi to open a gate or garage door via API call. You will need to create a table in [AirTable](https://airtable.com/) with 5 fields:
 - user (single line of text)
 - auth (single line of text)
 - enabled (checkbox)
 - admin (checkbox)
+- invite (single line of text)
 
 You will also need to generate a token from the [Airtable Dev Portal](https://airtable.com/create/tokens). Grant read and write scopes to the base.
 
@@ -24,6 +25,25 @@ This is the hardware I am using. You can certainly do this with less. A pi0, jum
 
 1. Install Docker (I prefer the apt method):
 - [Docker Install documentation](https://docs.docker.com/engine/install/raspberry-pi-os/)
+```bash
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/raspbian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Set up Docker's Apt repository:
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/raspbian \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+```
+
+```bash
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
 
 2. Install Docker Compose:
 ```bash
@@ -83,6 +103,18 @@ services:
       GPIO_PIN: "16" #GPIO PIN
       TOKEN_INTERVAL: "5400" #how long in seconds before pulling in new tokens. (Free version has a limit of 1000 calls a month)
 
+      #these are only required if you want to receive approval emails for new devices
+      #PROXY_URL: "https://gate.example.com" #Proxy URL for your server. Where it can be reached
+      #SENDER_EMAIL: "[someoneaccount]@gmail.com" #Sender email adress. Typically some account you created for this. If you are not using gmail you will need the additional variables below
+      #SMTP_PASSWORD: "<email password>"  #SMTP password for the SENDER_EMAIL account. If you are using gmail you must generate an app password
+      #RECEIVER_EMAIL: "[youremail]@gmail.com" #The email where you want to recieve approval emails. Typically your personal email
+
+      #these are only required if you want to send email from a provider other than gmail
+      #SMTP_SERVER: "smtp.outlook.com" #defaults to smtp.gmail.com
+      #SMTP_PORT: 25 #defaults to 587
+      #SMTP_USERNAME: <your_mail_username> #defaults to SENDER_EMAIL
+      
+
     ports:
       - "5151:5151"
 ```
@@ -118,7 +150,8 @@ These are the api endpoints for the server:
 
 | Method   | URL                                      | Description                                             | Auth | Params |
 | -------- | ---------------------------------------- | --------------------------------------------------------| ---- | ------ |
-| `GET`    | `/api/v1/hello`                          | Sends an authorized request to the server to test access.|:heavy_check_mark:|       |
-| `POST`   | `/api/v1/register`                       | Registers a new device/key to the Airtable. Admin approval is required in Airtable after this is completed. |      | device      |
-| `POST`   | `/api/v1/trigger`                        | Triggers the relay.                                     |:heavy_check_mark:|        |
-| `POST`   | `/api/v1/refreshtokens`                  | Refreshes the tokens from Airtable.                     |:heavy_check_mark:|        |
+| `GET`    | `/api/v1/hello`                          | Sends an authorized request to the server to test access |:heavy_check_mark:|       |
+| `POST`   | `/api/v1/register`                       | Registers a new device/key to the Airtable. Admin approval is required in Airtable after this is completed  |      | device      |
+| `POST`   | `/api/v1/trigger`                        | Triggers the relay                                      |:heavy_check_mark: |        |
+| `POST`   | `/api/v1/refreshtokens`                  | Refreshes the tokens from Airtable                      |:heavy_check_mark: |        |
+| `GET`   | `/api/v1/user/enable`                     | Enables users using the invite token                    |                   | invite |
