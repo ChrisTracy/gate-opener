@@ -252,7 +252,7 @@ def refresh_tokens():
         return f"Access denied. You do not have access to this route!"
 
 @app.route('/api/v1/user/enable', methods=['GET'])
-def enable(psk=psk):
+def enable():
     invite = request.args.get('invite')
     psk = request.args.get('psk')
 
