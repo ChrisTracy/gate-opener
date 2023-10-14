@@ -241,7 +241,7 @@ def refresh_tokens():
         logging.info("%s does not have admin permissions to call refresh token route.", current_user_name)
         return f"Access denied. You do not have access to this route!"
 
-@app.route('/api/v1/enable', methods=['GET'])
+@app.route('/api/v1/user/enable', methods=['GET'])
 def enable():
     invite = request.args.get('invite')
     if invite:
