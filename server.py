@@ -30,7 +30,7 @@ smtp_server = (os.environ.get('SMTP_SERVER', "smtp.gmail.com"))
 smtp_port = int(os.environ.get('SMTP_PORT', 587))
 smtp_username = (os.environ.get('SMTP_USERNAME', sender_email))
 smtp_password = os.environ['SMTP_PASSWORD']
-html_file_path = (os.environ.get('HTML_FILE_PATH', "/html/new-user-email.html"))  # Path to the HTML file
+html_file_path = (os.environ.get('HTML_FILE_PATH', "html/new-user-email.html"))  # Path to the HTML file
 
 # Function to pull tokens
 def get_tokens(thread=False):
