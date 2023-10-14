@@ -33,10 +33,8 @@ smtp_password = (os.environ.get('SMTP_PASSWORD', None))
 html_file_path = (os.environ.get('HTML_FILE_PATH', "html/new-user-email.html"))  # Path to the HTML file
 
 #setup psk's
-register_user_psk = (os.environ.get('REGISTER_PSK', 1))
-enable_user_psk = (os.environ.get('ENABLE_PSK', 1))
-global psk 
-psk = 1
+register_user_psk = os.environ['REGISTER_PSK']
+enable_user_psk = os.environ['ENABLE_PSK']
 
 # Function to pull tokens
 def get_tokens(thread=False):
@@ -188,8 +186,7 @@ def index():
 @app.route('/api/v1/register', methods=["POST"])
 def register():
     device = request.args.get('device')
-    if psk != 1:
-        psk = request.args.get('psk')
+    psk = request.args.get('psk')
     
     if psk == register_user_psk:
         if device is not None:
@@ -255,10 +252,9 @@ def refresh_tokens():
         return f"Access denied. You do not have access to this route!"
 
 @app.route('/api/v1/user/enable', methods=['GET'])
-def enable():
+def enable(psk=psk):
     invite = request.args.get('invite')
-    if psk != 1:
-        psk = request.args.get('psk')
+    psk = request.args.get('psk')
 
     if psk == enable_user_psk: 
         if invite:
