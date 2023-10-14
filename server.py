@@ -15,7 +15,6 @@ import RPi.GPIO as GPIO
 from modules.send_html_email import send_dynamic_email
 
 # Set GPIO pin and friendly name
-proxy_url = os.environ['PROXY_URL']
 friendly_name = os.environ['FRIENDLY_NAME']
 pin = int(os.environ['GPIO_PIN'])
 
@@ -24,12 +23,13 @@ jwt_secret_key = os.environ['JWT_SECRET_KEY']
 JWT_EXPIRATION_DAYS = int(os.environ.get('JWT_EXPIRATION_DAYS', 365))
 
 # Email configuration
-sender_email = os.environ['SENDER_EMAIL']
-receiver_email = os.environ['RECEIVER_EMAIL']
+proxy_url = (os.environ.get('PROXY_URL', None))
+sender_email = (os.environ.get('SENDER_EMAIL', None))
+receiver_email = (os.environ.get('RECEIVER_EMAIL', None))
 smtp_server = (os.environ.get('SMTP_SERVER', "smtp.gmail.com"))
 smtp_port = int(os.environ.get('SMTP_PORT', 587))
 smtp_username = (os.environ.get('SMTP_USERNAME', sender_email))
-smtp_password = os.environ['SMTP_PASSWORD']
+smtp_password = (os.environ.get('SMTP_PASSWORD', None))
 html_file_path = (os.environ.get('HTML_FILE_PATH', "html/new-user-email.html"))  # Path to the HTML file
 
 # Function to pull tokens
