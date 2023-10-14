@@ -35,6 +35,6 @@ def send_dynamic_email(sender_email, receiver_email, smtp_server, smtp_port, smt
         server.login(smtp_username, smtp_password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
         server.quit()
-        print("Email sent successfully")
+        return ("Email sent successfully")
     except Exception as e:
-        print(f"Email could not be sent. Error: {str(e}")
+        return (f"Email could not be sent. Error: {e}")
