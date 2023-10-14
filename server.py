@@ -209,6 +209,7 @@ def register():
                     'device_name': device,
                     'host': proxy_url,
                     'invite_str': invite_string,
+                    'psk': enable_user_psk,
                 }
                 
                 subject = f"New Device Request for {friendly_name}"
