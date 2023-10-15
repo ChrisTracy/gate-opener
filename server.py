@@ -4,8 +4,6 @@ import datetime
 import time
 import logging
 import json
-import random
-import string
 import jwt
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPTokenAuth
@@ -13,6 +11,7 @@ from waitress import serve
 from pyairtable import Api
 import RPi.GPIO as GPIO
 from modules.send_html_email import send_dynamic_email
+import modules.helper as helper
 
 # Set GPIO pin and friendly name
 friendly_name = os.environ['FRIENDLY_NAME']
@@ -107,51 +106,6 @@ GPIO.output(pin, GPIO.LOW)
 app = Flask(__name__)
 auth = HTTPTokenAuth(scheme='Bearer')
 
-# Helper function to get user by their device
-def get_user_by_device(ATcontents, desired_device_name):
-    for user_data in ATcontents:
-        if "auth" in user_data['fields']:
-            auth_val = user_data['fields']['auth']
-            try:
-                auth_data = json.loads(auth_val)
-                dev = auth_data.get('device')
-                if auth_data.get('device') == desired_device_name:
-                    user_name = user_data['fields'].get('user')
-                    if user_name:
-                        return user_name
-            except json.JSONDecodeError:
-                pass
-    return None
-
-# Helper function to get admin by their device
-def get_admin_by_device(ATcontents, desired_device_name):
-    for user_data in ATcontents:
-        if "auth" in user_data['fields']:
-            auth_val = user_data['fields']['auth']
-            try:
-                auth_data = json.loads(auth_val)
-                if auth_data.get('device') == desired_device_name:
-                    admin = user_data['fields'].get('admin')
-                    if admin:
-                        return admin
-            except json.JSONDecodeError:
-                pass
-    return None
-
-# Helper function to get user by their invite ID
-def get_user_by_invite(ATcontents, invite_str):
-    for user_data in ATcontents:
-        if "invite" in user_data['fields']:
-            invite_val = user_data['fields']['invite']
-            if invite_val == invite_str:
-                return user_data
-    return None
-
-def generate_random_string(length):
-    characters = string.ascii_letters + string.digits
-    random_string = ''.join(random.choice(characters) for _ in range(length))
-    return random_string
-
 # Verify token using JWT
 @auth.verify_token
 def verify_token(token):
@@ -164,8 +118,8 @@ def verify_token(token):
         if is_rand_in_auth:
             global current_user_name
             global isAdmin
-            current_user_name = get_user_by_device(ATcontents, device_str)
-            isAdmin = get_admin_by_device(ATcontents, device_str)
+            current_user_name = helper.get_user_by_device(ATcontents, device_str)
+            isAdmin = helper.get_admin_by_device(ATcontents, device_str)
             logging.info("Token found! Auth Successful for %s", current_user_name)
             return True
     except jwt.ExpiredSignatureError:
@@ -192,8 +146,8 @@ def register():
         if device is not None:
             # Create a JWT token with user/device information
             expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=JWT_EXPIRATION_DAYS)
-            random_16_char_string = generate_random_string(16)
-            invite_string = generate_random_string(30)
+            random_16_char_string = helper.generate_random_string(16)
+            invite_string = helper.generate_random_string(30)
             token = jwt.encode({'device': device, 'rand': random_16_char_string}, jwt_secret_key, algorithm='HS256')
     
             # Store the token and user/device information in Airtable
@@ -261,7 +215,7 @@ def enable():
             try:
                 get_tokens()
                 logging.info("Attempting to Enable user with invite %s", invite)
-                user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
+                user = helper.get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
                 tableItemID = user['id']
                 enabled = user['fields'].get('enabled')
                 logging.info(enabled)
@@ -296,7 +250,7 @@ def reject():
             try:
                 get_tokens()
                 logging.info("Attempting to reject user with invite %s", invite)
-                user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
+                user = helper.get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
                 tableItemID = user['id']
                 if tableItemID:
                     table.delete(tableItemID)
