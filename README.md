@@ -102,7 +102,7 @@ services:
       TABLE_NAME: "users" #Airtable table name
       GPIO_PIN: "16" #GPIO PIN
       REGISTER_PSK: "<random key>" #Create a random pre-shared key that you will share when clients register. THIS IS NOT SECURE UNLESS YOU ARE BEHIND A PROXY WITH A VALID CERT
-      ENABLE_PSK: "<random key>" #Create a random pre-shared key that you will use to enable users. THIS IS NOT SECURE UNLESS YOU ARE BEHIND A PROXY WITH A VALID CERT
+      APPROVAL_PSK: "<random key>" #Create a random pre-shared key that you will use to approve/reject users. THIS IS NOT SECURE UNLESS YOU ARE BEHIND A PROXY WITH A VALID CERT
       TOKEN_INTERVAL: "5400" #how long in seconds before pulling in new tokens. (Free version has a limit of 1000 calls a month)
 
       #these are only required if you want to receive approval emails for new devices
@@ -157,3 +157,4 @@ These are the api endpoints for the server:
 | `POST`   | `/api/v1/trigger`                        | Triggers the relay                                      |:heavy_check_mark: |        |
 | `POST`   | `/api/v1/refreshtokens`                  | Refreshes the tokens from Airtable                      |:heavy_check_mark: |        |
 | `GET`   | `/api/v1/user/enable`                     | Enables users using the invite token                    |                   | invite, psk |
+| `GET`   | `/api/v1/user/reject`                     | Rejects/removes users using the invite token            |                   | invite, psk |
