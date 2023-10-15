@@ -34,7 +34,7 @@ html_file_path = (os.environ.get('HTML_FILE_PATH', "html/new-user-email.html")) 
 
 #setup psk's
 register_user_psk = os.environ['REGISTER_PSK']
-enable_user_psk = os.environ['ENABLE_PSK']
+approval_psk = os.environ['APPROVAL_PSK']
 
 # Function to pull tokens
 def get_tokens(thread=False):
@@ -209,7 +209,7 @@ def register():
                     'device_name': device,
                     'host': proxy_url,
                     'invite_str': invite_string,
-                    'psk': enable_user_psk,
+                    'psk': approval_psk,
                 }
                 
                 subject = f"New Device Request for {friendly_name}"
@@ -256,7 +256,7 @@ def enable():
     invite = request.args.get('invite')
     psk = request.args.get('psk')
 
-    if psk == enable_user_psk: 
+    if psk == approval_psk: 
         if invite:
             try:
                 get_tokens()
@@ -277,6 +277,34 @@ def enable():
                     return f"Could not find table item for invite: {invite}"
             except Exception as e: 
                 logging.error(f"Not able to enable device. Invite: {invite}. Error: {e}")
+                return f"Invite code not found. Ensure ivite code is correct. Invite: {invite}"
+        else:
+            logging.info("Invite not found in the URL")
+            return 'Invite not found in the URL'
+    else:
+       logging.exception('PSK did not match on enable route. Provided PSK: %s', psk)
+       return jsonify({"message": "Invalid PSK. Access denied."}), 401
+
+
+@app.route('/api/v1/user/reject', methods=['GET'])
+def enable():
+    invite = request.args.get('invite')
+    psk = request.args.get('psk')
+
+    if psk == approval_psk: 
+        if invite:
+            try:
+                get_tokens()
+                logging.info("Attempting to reject user with invite %s", invite)
+                user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
+                tableItemID = user['id']
+                if tableItemID:
+                    table.delete(tableItemID)
+                    return f"User was deleted from table. Invite: {invite}"
+                else:
+                    return f"Could not find table item for invite: {invite}"
+            except Exception as e: 
+                logging.error(f"Not able to delete device. Invite: {invite}. Error: {e}")
                 return f"Invite code not found. Ensure ivite code is correct. Invite: {invite}"
         else:
             logging.info("Invite not found in the URL")
