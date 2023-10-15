@@ -287,7 +287,7 @@ def enable():
 
 
 @app.route('/api/v1/user/reject', methods=['GET'])
-def enable():
+def reject():
     invite = request.args.get('invite')
     psk = request.args.get('psk')
 
