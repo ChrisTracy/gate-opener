@@ -31,7 +31,6 @@ logging.basicConfig(
 def get_tokens(thread=False):
     try:
         logging.info('Getting tokens from AirTable')
-        global api
         global table
         api = Api(config.at_api_key)
         table = api.table(base_id=config.at_baseid, table_name=config.at_tablename)
@@ -42,7 +41,6 @@ def get_tokens(thread=False):
         global auths
         auths = []
 
-        global user_auth_dict
         user_auth_dict = {}
 
         global current_user_name
