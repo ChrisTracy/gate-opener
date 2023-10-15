@@ -1,3 +1,5 @@
+import os
+
 #server envs
 friendly_name = os.environ['FRIENDLY_NAME']
 
