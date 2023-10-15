@@ -192,7 +192,6 @@ def enable():
                 user = helper.get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
                 tableItemID = user['id']
                 enabled = user['fields'].get('enabled')
-                logging.info(enabled)
                 if tableItemID:
                     if enabled != True:
                         table.update(tableItemID, {"enabled": True})
