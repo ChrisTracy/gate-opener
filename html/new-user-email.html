@@ -13,13 +13,14 @@
             margin: 0;
             padding: 0;
             background-color: #5840aa;
+            font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+            color: #fff;
         }
 
         .container {
-            max-width: 680px;
-            margin: 0 auto;
+            max-width: 100%;
+            margin: 0;
             background-color: #0c131d;
-            color: #fff;
         }
 
         .header {
@@ -28,9 +29,8 @@
         }
 
         .header h1 {
-            font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-            font-size: 30px;
-            line-height: 36px;
+            font-size: 24px;
+            line-height: 30px;
             margin: 0;
         }
 
@@ -40,23 +40,46 @@
         }
 
         .content p {
-            font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
             font-size: 16px;
             line-height: 150%;
         }
 
-        .button {
+        .buttons {
             text-align: center;
         }
 
-        .button a {
+        .button {
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .approve-button a,
+        .reject-button a {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #0099cc;
-            color: #fff;
-            text-decoration: none;
-            font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
             font-size: 16px;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .approve-button a {
+            background-color: #00cc00; /* Green color for the approve button */
+        }
+
+        .reject-button a {
+            background-color: #ff0000; /* Red color for the reject button */
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 22px;
+            }
+            .content p {
+                font-size: 14px;
+            }
+            .button {
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
@@ -68,10 +91,15 @@
         <div class="content">
             <p>A new device is requesting access to {friendly_name}.</p>
             <p>Device: {device_name}</p>
-            <p>Click the button below to approve the request.</p>
+            <p>Click the buttons below to approve or reject the request.</p>
         </div>
-        <div class="button">
-            <a href="{host}/api/v1/user/enable?invite={invite_str}&psk={psk}">Approve</a>
+        <div class="buttons">
+            <div class="button approve-button">
+                <a href="{host}/api/v1/user/enable?invite={invite_str}&psk={psk}">Approve</a>
+            </div>
+            <div class="button reject-button">
+                <a href="{host}/api/v1/user/reject?invite={invite_str}&psk={psk}">Reject</a>
+            </div>
         </div>
     </div>
 </body>
