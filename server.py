@@ -12,7 +12,7 @@ from pyairtable import Api
 import RPi.GPIO as GPIO
 from modules.send_html_email import send_dynamic_email
 import modules.helper as helper
-from config import config
+import config
 
 # Setup console logging and file logging
 log_format = "%(asctime)s [%(levelname)s] %(message)s"
