@@ -8,7 +8,7 @@ pin = int(os.environ['GPIO_PIN'])
 
 # JWT envs
 jwt_secret_key = os.environ['JWT_SECRET_KEY']
-jwt_expirtation_days = int(os.environ.get('JWT_EXPIRATION_DAYS', 365))
+jwt_expiration_days = int(os.environ.get('JWT_EXPIRATION_DAYS', 365))
 
 # SMTP envs
 proxy_url = (os.environ.get('PROXY_URL', None))
