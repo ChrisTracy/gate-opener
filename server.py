@@ -111,7 +111,7 @@ def index():
     return f"Hello {current_user_name}. You logged in to {config.friendly_name} successfully!"
 
 # Register route - Issue tokens
-@app.route('/api/v1/register', methods=["POST"])
+@app.route('/api/v1/user/register', methods=["POST"])
 def register():
     device = request.args.get('device')
     psk = request.args.get('psk')
