@@ -1,9 +1,7 @@
-import os
 import threading
 import datetime
 import time
 import logging
-import json
 import jwt
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPTokenAuth
