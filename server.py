@@ -1,11 +1,7 @@
-import os
 import threading
 import datetime
 import time
 import logging
-import json
-import random
-import string
 import jwt
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPTokenAuth
@@ -13,70 +9,8 @@ from waitress import serve
 from pyairtable import Api
 import RPi.GPIO as GPIO
 from modules.send_html_email import send_dynamic_email
-
-# Set GPIO pin and friendly name
-friendly_name = os.environ['FRIENDLY_NAME']
-pin = int(os.environ['GPIO_PIN'])
-
-# Set JWT secret key (keep this secret) and client token expiration
-jwt_secret_key = os.environ['JWT_SECRET_KEY']
-JWT_EXPIRATION_DAYS = int(os.environ.get('JWT_EXPIRATION_DAYS', 365))
-
-# Email configuration
-proxy_url = (os.environ.get('PROXY_URL', None))
-sender_email = (os.environ.get('SENDER_EMAIL', None))
-receiver_email = (os.environ.get('RECEIVER_EMAIL', None))
-smtp_server = (os.environ.get('SMTP_SERVER', "smtp.gmail.com"))
-smtp_port = int(os.environ.get('SMTP_PORT', 587))
-smtp_username = (os.environ.get('SMTP_USERNAME', sender_email))
-smtp_password = (os.environ.get('SMTP_PASSWORD', None))
-html_file_path = (os.environ.get('HTML_FILE_PATH', "html/new-user-email.html"))  # Path to the HTML file
-
-#setup psk's
-register_user_psk = os.environ['REGISTER_PSK']
-approval_psk = os.environ['APPROVAL_PSK']
-
-# Function to pull tokens
-def get_tokens(thread=False):
-    try:
-        logging.info('Getting tokens from AirTable')
-        at_api_key = os.environ['AT_API_KEY']
-        AT_BaseID = os.environ['BASE_ID']
-        AT_TableName = os.environ['TABLE_NAME']
-        Token_Interval = int(os.environ['TOKEN_INTERVAL'])
-
-        global api
-        global table
-        api = Api(at_api_key)
-        table = api.table(base_id=AT_BaseID, table_name=AT_TableName)
-
-        global ATcontents
-        ATcontents = table.all()
-
-        global auths
-        auths = []
-
-        global user_auth_dict
-        user_auth_dict = {}
-
-        global current_user_name
-        current_user_name = None
-
-        if ATcontents is not None:
-            for ATcontent in ATcontents:
-                if "enabled" in ATcontent['fields']:
-                    userVal = ATcontent['fields']['user']
-                    authVal = ATcontent['fields']['auth']
-                    user_auth_dict[userVal] = authVal
-                    auths.append(authVal)
-        
-        if thread == True:
-            threading.Timer(Token_Interval, get_tokens, args=(True,)).start()
-        else:
-            return ('Token refresh completed')
-
-    except Exception as e:
-        logging.exception("Could not reach Airtable: %s", str(e))
+import modules.helper as helper
+import config
 
 # Setup console logging and file logging
 log_format = "%(asctime)s [%(levelname)s] %(message)s"
@@ -93,70 +27,60 @@ logging.basicConfig(
     ]
 )
 
+# Function to pull tokens
+def get_tokens(thread=False):
+    try:
+        logging.info('Getting tokens from AirTable')
+        global table
+        api = Api(config.at_api_key)
+        table = api.table(base_id=config.at_baseid, table_name=config.at_tablename)
+
+        global ATcontents
+        ATcontents = table.all()
+
+        global auths
+        auths = []
+
+        user_auth_dict = {}
+
+        global current_user_name
+        current_user_name = None
+
+        if ATcontents is not None:
+            for ATcontent in ATcontents:
+                if "enabled" in ATcontent['fields']:
+                    userVal = ATcontent['fields']['user']
+                    authVal = ATcontent['fields']['auth']
+                    user_auth_dict[userVal] = authVal
+                    auths.append(authVal)
+        
+        if thread == True:
+            threading.Timer(config.token_interval, get_tokens, args=(True,)).start()
+        else:
+            return ('Token refresh completed')
+
+    except Exception as e:
+        logging.exception("Could not reach Airtable: %s", str(e))
+
 # Run get tokens on the specified interval
 threading.Thread(target=get_tokens, args=(True,)).start()
 
 # Setup GPIO
-logging.info('Setting up GPIO on pin %s', pin)
+logging.info('Setting up GPIO on pin %s', config.pin)
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(pin, GPIO.OUT)
-GPIO.output(pin, GPIO.LOW)
+GPIO.setup(config.pin, GPIO.OUT)
+GPIO.output(config.pin, GPIO.LOW)
 
 # Initialize Flask
 app = Flask(__name__)
 auth = HTTPTokenAuth(scheme='Bearer')
 
-# Helper function to get user by their device
-def get_user_by_device(ATcontents, desired_device_name):
-    for user_data in ATcontents:
-        if "auth" in user_data['fields']:
-            auth_val = user_data['fields']['auth']
-            try:
-                auth_data = json.loads(auth_val)
-                dev = auth_data.get('device')
-                if auth_data.get('device') == desired_device_name:
-                    user_name = user_data['fields'].get('user')
-                    if user_name:
-                        return user_name
-            except json.JSONDecodeError:
-                pass
-    return None
-
-# Helper function to get admin by their device
-def get_admin_by_device(ATcontents, desired_device_name):
-    for user_data in ATcontents:
-        if "auth" in user_data['fields']:
-            auth_val = user_data['fields']['auth']
-            try:
-                auth_data = json.loads(auth_val)
-                if auth_data.get('device') == desired_device_name:
-                    admin = user_data['fields'].get('admin')
-                    if admin:
-                        return admin
-            except json.JSONDecodeError:
-                pass
-    return None
-
-# Helper function to get user by their invite ID
-def get_user_by_invite(ATcontents, invite_str):
-    for user_data in ATcontents:
-        if "invite" in user_data['fields']:
-            invite_val = user_data['fields']['invite']
-            if invite_val == invite_str:
-                return user_data
-    return None
-
-def generate_random_string(length):
-    characters = string.ascii_letters + string.digits
-    random_string = ''.join(random.choice(characters) for _ in range(length))
-    return random_string
-
 # Verify token using JWT
 @auth.verify_token
 def verify_token(token):
     try:
-        payload = jwt.decode(token, jwt_secret_key, algorithms=['HS256'])
+        payload = jwt.decode(token, config.jwt_secret_key, algorithms=['HS256'])
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         device_str = payload.get('device')
@@ -164,8 +88,8 @@ def verify_token(token):
         if is_rand_in_auth:
             global current_user_name
             global isAdmin
-            current_user_name = get_user_by_device(ATcontents, device_str)
-            isAdmin = get_admin_by_device(ATcontents, device_str)
+            current_user_name = helper.get_user_by_device(ATcontents, device_str)
+            isAdmin = helper.get_admin_by_device(ATcontents, device_str)
             logging.info("Token found! Auth Successful for %s", current_user_name)
             return True
     except jwt.ExpiredSignatureError:
@@ -180,21 +104,21 @@ def verify_token(token):
 @auth.login_required
 def index():
     current_user = auth.current_user()
-    return f"Hello {current_user_name}. You logged in to {friendly_name} successfully!"
+    return f"Hello {current_user_name}. You logged in to {config.friendly_name} successfully!"
 
 # Register route - Issue tokens
-@app.route('/api/v1/register', methods=["POST"])
+@app.route('/api/v1/user/register', methods=["POST"])
 def register():
     device = request.args.get('device')
     psk = request.args.get('psk')
     
-    if psk == register_user_psk:
+    if psk == config.register_user_psk:
         if device is not None:
             # Create a JWT token with user/device information
-            expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=JWT_EXPIRATION_DAYS)
-            random_16_char_string = generate_random_string(16)
-            invite_string = generate_random_string(30)
-            token = jwt.encode({'device': device, 'rand': random_16_char_string}, jwt_secret_key, algorithm='HS256')
+            expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=config.jwt_expiration_days)
+            random_16_char_string = helper.generate_random_string(16)
+            invite_string = helper.generate_random_string(30)
+            token = jwt.encode({'device': device, 'rand': random_16_char_string}, config.jwt_secret_key, algorithm='HS256')
     
             # Store the token and user/device information in Airtable
             RawData = {"user": device, "auth": f'{{"device":"{device}", "rand":"{random_16_char_string}"}}', "invite": invite_string}
@@ -202,22 +126,22 @@ def register():
             logging.info('Registering new device: %s', device)
     
             #send email
-            if sender_email and receiver_email and smtp_password and proxy_url:
+            if config.sender_email and config.receiver_email and config.smtp_password and config.proxy_url:
                 # Define a dictionary of variables and their values
                 variables = {
-                    'friendly_name': friendly_name,
+                    'friendly_name': config.friendly_name,
                     'device_name': device,
-                    'host': proxy_url,
+                    'host': config.proxy_url,
                     'invite_str': invite_string,
-                    'psk': approval_psk,
+                    'psk': config.approval_psk,
                 }
                 
-                subject = f"New Device Request for {friendly_name}"
+                subject = f"New Device Request for {config.friendly_name}"
                 
                 # Call the send_dynamic_email function
-                send_dynamic_email(sender_email, receiver_email, smtp_server, smtp_port, smtp_username, smtp_password, subject, html_file_path, variables)
+                send_dynamic_email(config.sender_email, config.receiver_email, config.smtp_server, config.smtp_port, config.smtp_username, config.smtp_password, subject, config.html_file_path, variables)
     
-            return jsonify({"message": f"Your device ({device}) has been added to {friendly_name}. An admin must approve the request.", "token": token})
+            return jsonify({"message": f"Your device ({device}) has been added to {config.friendly_name}. An admin must approve the request.", "token": token})
         else:
             return jsonify({"message": "Missing the device parameter"})
     else:
@@ -228,12 +152,12 @@ def register():
 @app.route('/api/v1/trigger', methods=["POST"])
 @auth.login_required
 def trigger():
-    GPIO.output(pin, GPIO.HIGH)
+    GPIO.output(config.pin, GPIO.HIGH)
     time.sleep(.10)
-    GPIO.output(pin, GPIO.LOW)
+    GPIO.output(config.pin, GPIO.LOW)
 
-    logging.info("%s opened by %s", friendly_name, current_user_name)
-    return f"{friendly_name} opened by {current_user_name}"
+    logging.info("%s opened by %s", config.friendly_name, current_user_name)
+    return f"{config.friendly_name} opened by {current_user_name}"
 
 # Refresh token route
 @app.route('/api/v1/refreshtokens', methods=["POST"])
@@ -256,15 +180,14 @@ def enable():
     invite = request.args.get('invite')
     psk = request.args.get('psk')
 
-    if psk == approval_psk: 
+    if psk == config.approval_psk: 
         if invite:
             try:
                 get_tokens()
                 logging.info("Attempting to Enable user with invite %s", invite)
-                user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
+                user = helper.get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
                 tableItemID = user['id']
                 enabled = user['fields'].get('enabled')
-                logging.info(enabled)
                 if tableItemID:
                     if enabled != True:
                         table.update(tableItemID, {"enabled": True})
@@ -291,15 +214,16 @@ def reject():
     invite = request.args.get('invite')
     psk = request.args.get('psk')
 
-    if psk == approval_psk: 
+    if psk == config.approval_psk: 
         if invite:
             try:
                 get_tokens()
                 logging.info("Attempting to reject user with invite %s", invite)
-                user = get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
+                user = helper.get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
                 tableItemID = user['id']
                 if tableItemID:
                     table.delete(tableItemID)
+                    get_tokens()
                     return f"User was deleted from table. Invite: {invite}"
                 else:
                     return f"Could not find table item for invite: {invite}"

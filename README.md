@@ -153,7 +153,7 @@ These are the api endpoints for the server:
 | Method   | URL                                      | Description                                             | Auth | Params |
 | -------- | ---------------------------------------- | --------------------------------------------------------| ---- | ------ |
 | `GET`    | `/api/v1/hello`                          | Sends an authorized request to the server to test access |:heavy_check_mark:|       |
-| `POST`   | `/api/v1/register`                       | Registers a new device/key to the Airtable. Admin approval is required in Airtable after this is completed  |      | device, psk      |
+| `POST`   | `/api/v1/user/register`                       | Registers a new device/key to the Airtable. Admin approval is required in Airtable after this is completed  |      | device, psk      |
 | `POST`   | `/api/v1/trigger`                        | Triggers the relay                                      |:heavy_check_mark: |        |
 | `POST`   | `/api/v1/refreshtokens`                  | Refreshes the tokens from Airtable                      |:heavy_check_mark: |        |
 | `GET`   | `/api/v1/user/enable`                     | Enables users using the invite token                    |                   | invite, psk |
