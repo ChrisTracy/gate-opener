@@ -227,6 +227,7 @@ def reject():
                 tableItemID = user['id']
                 if tableItemID:
                     table.delete(tableItemID)
+                    get_tokens()
                     return f"User was deleted from table. Invite: {invite}"
                 else:
                     return f"Could not find table item for invite: {invite}"
