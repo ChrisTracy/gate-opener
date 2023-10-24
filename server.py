@@ -142,7 +142,7 @@ def register():
                 # Call the send_dynamic_email function
                 send_dynamic_email(config.sender_email, config.receiver_email, config.smtp_server, config.smtp_port, config.smtp_username, config.smtp_password, subject, config.html_file_path, variables)
     
-            return jsonify({"message": f"Your device ({device}) has been added to {config.friendly_name}. An admin must approve the request.", "host": host "token": token})
+            return jsonify({"message": f"Your device ({device}) has been added to {config.friendly_name}. An admin must approve the request.", "host": host, "token": token})
         else:
             return jsonify({"message": "Missing the device parameter"})
     else:
