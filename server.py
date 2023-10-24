@@ -118,6 +118,7 @@ def register():
             expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=config.jwt_expiration_days)
             random_16_char_string = helper.generate_random_string(16)
             invite_string = helper.generate_random_string(30)
+            host = config.proxy_url
             token = jwt.encode({'device': device, 'rand': random_16_char_string}, config.jwt_secret_key, algorithm='HS256')
     
             # Store the token and user/device information in Airtable
@@ -141,7 +142,7 @@ def register():
                 # Call the send_dynamic_email function
                 send_dynamic_email(config.sender_email, config.receiver_email, config.smtp_server, config.smtp_port, config.smtp_username, config.smtp_password, subject, config.html_file_path, variables)
     
-            return jsonify({"message": f"Your device ({device}) has been added to {config.friendly_name}. An admin must approve the request.", "token": token})
+            return jsonify({"message": f"Your device ({device}) has been added to {config.friendly_name}. An admin must approve the request.", "host": host "token": token})
         else:
             return jsonify({"message": "Missing the device parameter"})
     else:
