@@ -24,8 +24,12 @@ html_file_path = (os.environ.get('HTML_FILE_PATH', "html/new-user-email.html")) 
 register_user_psk = os.environ['REGISTER_PSK']
 approval_psk = os.environ['APPROVAL_PSK']
 
-#AirTable evns
+#AirTable envs
 at_api_key = os.environ['AT_API_KEY']
 at_baseid = os.environ['BASE_ID']
 at_tablename = os.environ['TABLE_NAME']
 token_interval = int(os.environ['TOKEN_INTERVAL'])
+
+#Pushover envs
+pushover_user = os.environ['PUSHOVER_USER']
+pushover_token = os.environ['PUSHOVER_TOKEN']
