@@ -115,6 +115,10 @@ services:
       #SMTP_SERVER: "smtp.outlook.com" #defaults to smtp.gmail.com
       #SMTP_PORT: 25 #defaults to 587
       #SMTP_USERNAME: <your_mail_username> #defaults to SENDER_EMAIL
+
+      #these are only required if you want a pushover notification when the trigger route is called
+      #PUSHOVER_USER: <your_pushover_user_token> #you can get this on the main pushover page
+      #PUSHOVER_TOKEN: <your_pushover_app_token> #create a new app and it will generate this token
       
 
     ports:

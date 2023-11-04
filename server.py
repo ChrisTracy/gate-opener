@@ -10,6 +10,7 @@ from pyairtable import Api
 import RPi.GPIO as GPIO
 from modules.send_html_email import send_dynamic_email
 import modules.helper as helper
+import notify.pushover as pushover
 import config
 
 # Setup console logging and file logging
@@ -158,6 +159,11 @@ def trigger():
     GPIO.output(config.pin, GPIO.LOW)
 
     logging.info("%s opened by %s", config.friendly_name, current_user_name)
+    if config.pushover_user and config.pushover_token:
+        logging.info("Sending pushover notification for trigger route")
+        triggerMessage = f"{config.friendly_name} opened by {current_user_name}"
+        pushover.send_message(text=triggerMessage,user=config.pushover_user,token=config.pushover_token)
+
     return f"{config.friendly_name} opened by {current_user_name}"
 
 # Refresh token route
