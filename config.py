@@ -31,5 +31,5 @@ at_tablename = os.environ['TABLE_NAME']
 token_interval = int(os.environ['TOKEN_INTERVAL'])
 
 #Pushover envs
-pushover_user = (os.environ.get('PPUSHOVER_USER', None))
-pushover_token = (os.environ.get('PPUSHOVER_TOKEN', None))
+pushover_user = (os.environ.get('PUSHOVER_USER', None))
+pushover_token = (os.environ.get('PUSHOVER_TOKEN', None))
