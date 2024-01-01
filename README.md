@@ -46,17 +46,12 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 ```
 
 2. Install Docker Compose:
+- [Docker Install documentation](https://docs.docker.com/compose/install/linux/)
 ```bash
-sudo apt-get install libffi-dev libssl-dev
+sudo apt-get update
 ```
 ```bash
-sudo apt install python3-dev
-```
-```bash
-sudo apt-get install -y python3 python3-pip
-```
-```bash
-sudo pip3 install docker-compose
+sudo apt-get install docker-compose-plugin
 ```
 
 3. Add the current user to the docker group to avoid using sudo. You must lougout and back in after doing this, otherwise you will need to sudo the rest of the commands!:
@@ -128,7 +123,7 @@ services:
 9. Bring up your stack by running:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Updating
