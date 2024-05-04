@@ -25,7 +25,7 @@ register_user_psk = os.environ['REGISTER_PSK']
 approval_psk = os.environ['APPROVAL_PSK']
 
 #Interval
-token_interval = int(os.environ['TOKEN_INTERVAL', 300])
+token_interval = int(os.environ['TOKEN_INTERVAL'])
 
 #Pushover envs
 pushover_user = (os.environ.get('PUSHOVER_USER', None))
