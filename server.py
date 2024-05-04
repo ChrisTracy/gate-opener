@@ -75,11 +75,16 @@ def verify_token(token):
     try:
         payload = jwt.decode(token, config.jwt_secret_key, algorithms=['HS256'])
         num_auth = str(payload.get('rand'))
-        invite_str = payload.get('device')  # Assuming 'device' is the invite string
+        invite_str = payload.get('device')
+        logging.debug("JWT decoded successfully. Payload: %s", payload)
+
         with sqlite3.connect('/db/users.db') as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT user, admin FROM users WHERE invite = ? AND auth LIKE ? AND enabled = TRUE", (invite_str, f'%{num_auth}%'))
+            sql_query = "SELECT user, admin FROM users WHERE invite = ? AND auth LIKE ? AND enabled = TRUE"
+            cursor.execute(sql_query, (invite_str, f'%{num_auth}%'))
             user_info = cursor.fetchone()
+            logging.debug("SQL Query executed. Result: %s", user_info)
+
             if user_info:
                 global current_user_name, isAdmin
                 current_user_name, isAdmin = user_info
@@ -87,9 +92,14 @@ def verify_token(token):
                 return True
     except jwt.ExpiredSignatureError:
         logging.error('Token has expired')
+        return False
     except jwt.InvalidTokenError:
         logging.error('Invalid token')
-    return False
+        return False
+    except Exception as e:
+        logging.error("Unexpected error during token verification: %s", str(e))
+        return False
+
 
 # Welcome route
 @app.route('/api/v1/hello')
