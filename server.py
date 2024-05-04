@@ -1,3 +1,4 @@
+import os
 import threading
 import datetime
 import time
@@ -28,10 +29,19 @@ logging.basicConfig(
     ]
 )
 
-# Database setup
 def init_db():
-    conn = sqlite3.connect('/db/users.db')  # Specify the path to the database
+    db_directory = '/db'
+    db_path = f'{db_directory}/users.db'
+    
+    # Ensure the directory exists
+    if not os.path.exists(db_directory):
+        os.makedirs(db_directory)
+
+    # Connect to the SQLite database (creates if not exists)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
+    
+    # Create the 'users' table if it does not already exist
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,6 +54,7 @@ def init_db():
     ''')
     conn.commit()
     conn.close()
+    print("Database initialized (if it was not already).")
 
 init_db()
 
