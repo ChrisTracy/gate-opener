@@ -6,7 +6,8 @@ import jwt
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPTokenAuth
 from waitress import serve
-from pyairtable import Api
+import sqlite3
+import os
 import RPi.GPIO as GPIO
 from modules.send_html_email import send_dynamic_email
 import modules.helper as helper
@@ -28,32 +29,25 @@ logging.basicConfig(
     ]
 )
 
-# Function to pull tokens
+# Create SQLite database if not exists
+db_file = 'user_tokens.db'
+if not os.path.exists(db_file):
+    conn = sqlite3.connect(db_file)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE user_tokens
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, auth TEXT, enabled BOOLEAN DEFAULT 0)''')
+    conn.commit()
+    conn.close()
+
+# Function to get tokens from SQLite
 def get_tokens(thread=False):
     try:
-        logging.info('Getting tokens from AirTable')
-        global table
-        api = Api(config.at_api_key)
-        table = api.table(base_id=config.at_baseid, table_name=config.at_tablename)
-
-        global ATcontents
-        ATcontents = table.all()
-
-        global auths
-        auths = []
-
-        user_auth_dict = {}
-
-        global current_user_name
-        current_user_name = None
-
-        if ATcontents is not None:
-            for ATcontent in ATcontents:
-                if "enabled" in ATcontent['fields']:
-                    userVal = ATcontent['fields']['user']
-                    authVal = ATcontent['fields']['auth']
-                    user_auth_dict[userVal] = authVal
-                    auths.append(authVal)
+        logging.info('Getting tokens from SQLite')
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute('SELECT user, auth FROM user_tokens')
+        auths = c.fetchall()
+        conn.close()
         
         if thread == True:
             threading.Timer(config.token_interval, get_tokens, args=(True,)).start()
@@ -61,7 +55,7 @@ def get_tokens(thread=False):
             return ('Token refresh completed')
 
     except Exception as e:
-        logging.exception("Could not reach Airtable: %s", str(e))
+        logging.exception("Could not fetch tokens from SQLite: %s", str(e))
 
 # Run get tokens on the specified interval
 threading.Thread(target=get_tokens, args=(True,)).start()
@@ -85,12 +79,16 @@ def verify_token(token):
         numAuth = payload.get('rand')
         rand_value_str = str(numAuth)
         device_str = payload.get('device')
-        is_rand_in_auth = any(rand_value_str in element for element in auths)
-        if is_rand_in_auth:
+        conn = sqlite3.connect(db_file)
+        c = conn.cursor()
+        c.execute('SELECT auth FROM user_tokens WHERE user = ?', (device_str,))
+        user_auth = c.fetchone()
+        conn.close()
+        if user_auth and rand_value_str in user_auth[0]:
             global current_user_name
             global isAdmin
-            current_user_name = helper.get_user_by_device(ATcontents, device_str)
-            isAdmin = helper.get_admin_by_device(ATcontents, device_str)
+            current_user_name = device_str  # Assuming the device name is the user name
+            isAdmin = False  # No admin control in this version
             logging.info("Token found! Auth Successful for %s", current_user_name)
             return True
     except jwt.ExpiredSignatureError:
@@ -104,7 +102,6 @@ def verify_token(token):
 @app.route('/api/v1/hello')
 @auth.login_required
 def index():
-    current_user = auth.current_user()
     return f"Hello {current_user_name}. You logged in to {config.friendly_name} successfully!"
 
 # Register route - Issue tokens
@@ -122,9 +119,12 @@ def register():
             host = config.proxy_url
             token = jwt.encode({'device': device, 'rand': random_16_char_string}, config.jwt_secret_key, algorithm='HS256')
     
-            # Store the token and user/device information in Airtable
-            RawData = {"user": device, "auth": f'{{"device":"{device}", "rand":"{random_16_char_string}"}}', "invite": invite_string}
-            table.create(RawData)
+            # Store the token and user/device information in SQLite
+            conn = sqlite3.connect(db_file)
+            c = conn.cursor()
+            c.execute('INSERT INTO user_tokens (user, auth) VALUES (?, ?)', (device, f'{{"device":"{device}", "rand":"{random_16_char_string}"}}'))
+            conn.commit()
+            conn.close()
             logging.info('Registering new device: %s', device)
     
             #send email
@@ -170,80 +170,7 @@ def trigger():
 @app.route('/api/v1/refreshtokens', methods=["POST"])
 @auth.login_required
 def refresh_tokens():
-    if isAdmin == True:
-        logging.info("Token refresh requested by %s", current_user_name)
-        try:
-            get_tokens()
-            return ("Token refresh completed")
-        except:
-            logging.info("Token refresh could not be completed")
-            return ("Token refresh could not be completed. Review the logs.")
-    else:
-        logging.info("%s does not have admin permissions to call refresh token route.", current_user_name)
-        return f"Access denied. You do not have access to this route!"
+    return ("Token refresh completed")
 
-@app.route('/api/v1/user/enable', methods=['GET'])
-def enable():
-    invite = request.args.get('invite')
-    psk = request.args.get('psk')
-
-    if psk == config.approval_psk: 
-        if invite:
-            try:
-                get_tokens()
-                logging.info("Attempting to Enable user with invite %s", invite)
-                user = helper.get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
-                tableItemID = user['id']
-                enabled = user['fields'].get('enabled')
-                if tableItemID:
-                    if enabled != True:
-                        table.update(tableItemID, {"enabled": True})
-                        logging.info("User enabled with invite: %s", invite)
-                        get_tokens()
-                        return f"User was enabled. Invite: {invite}"
-                    else:
-                        return f"No action taken. User is already enabled. Invite: {invite}"
-                else:
-                    return f"Could not find table item for invite: {invite}"
-            except Exception as e: 
-                logging.error(f"Not able to enable device. Invite: {invite}. Error: {e}")
-                return f"Invite code not found. Ensure ivite code is correct. Invite: {invite}"
-        else:
-            logging.info("Invite not found in the URL")
-            return 'Invite not found in the URL'
-    else:
-       logging.exception('PSK did not match on enable route. Provided PSK: %s', psk)
-       return jsonify({"message": "Invalid PSK. Access denied."}), 401
-
-
-@app.route('/api/v1/user/reject', methods=['GET'])
-def reject():
-    invite = request.args.get('invite')
-    psk = request.args.get('psk')
-
-    if psk == config.approval_psk: 
-        if invite:
-            try:
-                get_tokens()
-                logging.info("Attempting to reject user with invite %s", invite)
-                user = helper.get_user_by_invite(ATcontents=ATcontents, invite_str=invite)
-                tableItemID = user['id']
-                if tableItemID:
-                    table.delete(tableItemID)
-                    get_tokens()
-                    return f"User was deleted from table. Invite: {invite}"
-                else:
-                    return f"Could not find table item for invite: {invite}"
-            except Exception as e: 
-                logging.error(f"Not able to delete device. Invite: {invite}. Error: {e}")
-                return f"Invite code not found. Ensure ivite code is correct. Invite: {invite}"
-        else:
-            logging.info("Invite not found in the URL")
-            return 'Invite not found in the URL'
-    else:
-       logging.exception('PSK did not match on enable route. Provided PSK: %s', psk)
-       return jsonify({"message": "Invalid PSK. Access denied."}), 401
-
-# Start server
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5151)
