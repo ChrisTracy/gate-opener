@@ -46,7 +46,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 ```
 
 2. Install Docker Compose:
-- [Docker Install documentation](https://docs.docker.com/compose/install/linux/)
+- [Docker Compose Install documentation](https://docs.docker.com/compose/install/linux/)
 ```bash
 sudo apt-get update
 ```
@@ -59,33 +59,18 @@ sudo apt-get install docker-compose-plugin
 sudo usermod -aG docker ${USER}
 ```
 
-4. Clone the Github repo (docker hub does not support automated arm builds at this time. See [issue 109](https://github.com/docker/roadmap/issues/109)):
-```bash
-git clone https://github.com/ChrisTracy/gate-opener
-```
-
-5. Change directories into gate-opener:
-```bash
-cd gate-opener
-```
-
-6. Build the docker image:
-```bash
-docker build -t gate-opener .
-```
-
-7. Create a docker-compose.yml file:
+4. Create a docker-compose.yml file:
 ```bash
 nano docker-compose.yml
 ```
 
-8. Add this to the YAML file with your own parameters:
+5. Add this to the YAML file with your own parameters:
 ```yml
 version: "3"
 
 services:
   gate_opener:
-    image: gate-opener
+    image: christracy/gate-opener
     restart: unless-stopped
     privileged: true
     environment:
@@ -120,25 +105,16 @@ services:
       - "5151:5151"
 ```
 
-9. Bring up your stack by running:
+6. Bring up your stack by running:
 
 ```bash
 docker compose up -d
 ```
 
 ## Updating
-Until the previously mentioned [issue with Docker hub](https://github.com/docker/roadmap/issues/109) is resolved, you will need to update the server from github directly.
 
 ```bash
-cd gate-opener
-```
-
-```bash
-git pull
-```
-
-```bash
-docker build -t gate-opener .
+docker-compose pull
 ```
 
 ```bash
